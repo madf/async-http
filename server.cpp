@@ -26,4 +26,74 @@ std::string make_daytime_string()
     return buffer;
 }
 
+int main(int argc, char* argv[])
+{
+    const std::string version = "1.3.0";
+    std::string address;
+    std::string outfile;
+    std::string work_dir;
 
+    for (int i = 1; i < argc; ++i)
+    {
+        const std::string arg = argv[i];
+
+        if (arg == "-a" || arg == "--address")
+        {
+            if (i + 1 == argc)
+            {
+                std::cerr << arg << " needs an argument - an address.\n";
+                return 1;
+            }
+            address = argv[++i];
+        }
+        else if (arg == "-d" || arg == "--dir")
+        {
+            if (i + 1 == argc)
+            {
+                std::cerr << arg << " needs an argument - a filename.\n";
+                return 1;
+            }
+            work_dir = argv[++i];
+        }
+        else if (arg == "-o" || arg == "--outfile")
+        {
+            if (i + 1 == argc)
+            {
+                std::cerr << arg << " needs an argument - a filename.\n";
+                return 1;
+            }
+            outfile = argv[++i];
+        }
+        else if (arg == "-v" || arg == "--version")
+        {
+            std::cout << "Version " << version << "\n";
+            return 0;
+        }
+        else if (arg == "-h" || arg == "--help")
+        {
+            reference();
+            return 0;
+        }
+        else
+        {
+            std::cerr << "Unknown command line argument\n";
+            return 1;
+        }
+    }
+
+    std::string port = "80";
+    std::string host;
+    if (!address.empty())
+    {
+        const size_t pos = address.find(":");
+        if (pos != std::string::npos)
+        {
+            host = address.substr(0, pos);
+            port = address.substr(pos + 1, address.length() - pos - 1);
+        }
+        else
+        {
+            host = address;
+        }
+    }
+}
