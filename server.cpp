@@ -96,4 +96,9 @@ int main(int argc, char* argv[])
             host = address;
         }
     }
+
+    boost::asio::io_service io_service;
+    io_service.run();
+
+    return 0;
 }
