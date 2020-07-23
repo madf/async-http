@@ -26,6 +26,18 @@ std::string make_daytime_string()
     return buffer;
 }
 
+class tcp_server
+{
+public:
+    tcp_server(boost::asio::io_service& io_service)
+      : resolver_(io_service)
+    {
+    }
+
+private:
+    tcp::resolver resolver_;
+};
+
 int main(int argc, char* argv[])
 {
     const std::string version = "1.3.0";
@@ -98,6 +110,7 @@ int main(int argc, char* argv[])
     }
 
     boost::asio::io_service io_service;
+    tcp_server server(io_service);
     io_service.run();
 
     return 0;
