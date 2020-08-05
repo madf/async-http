@@ -4,6 +4,7 @@
 #include <ctime>
 
 using boost::asio::ip::tcp;
+using boost::system::error_code;
 
 void reference()
 {
@@ -29,13 +30,20 @@ std::string make_daytime_string()
 class tcp_server
 {
 public:
-    tcp_server(boost::asio::io_service& io_service)
+    tcp_server(boost::asio::io_service& io_service, const std::string& host, const std::string& port)
       : resolver_(io_service)
     {
+        namespace pls = std::placeholders;
+
+        resolver_.async_resolve(tcp::resolver::query(host, port), bind(&tcp_server::handle_resolve, this, pls::_1, pls::_2));
     }
 
 private:
     tcp::resolver resolver_;
+
+    void handle_resolve(const error_code& err, tcp::resolver::iterator endpoint_iterator)
+    {
+    }
 };
 
 int main(int argc, char* argv[])
@@ -110,7 +118,7 @@ int main(int argc, char* argv[])
     }
 
     boost::asio::io_service io_service;
-    tcp_server server(io_service);
+    tcp_server server(io_service, host, port);
     io_service.run();
 
     return 0;
