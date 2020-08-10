@@ -31,7 +31,8 @@ class tcp_server
 {
 public:
     tcp_server(boost::asio::io_service& io_service, const std::string& host, const std::string& port)
-      : resolver_(io_service)
+      : resolver_(io_service),
+        acceptor_(io_service)
     {
         namespace pls = std::placeholders;
 
@@ -39,11 +40,22 @@ public:
     }
 
 private:
-    tcp::resolver resolver_;
-
     void handle_resolve(const error_code& err, tcp::resolver::iterator endpoint_iterator)
     {
+        if (!err)
+        {
+            tcp::endpoint ep(*endpoint_iterator);
+            acceptor_.open(ep.protocol());
+            acceptor_.bind(ep);
+        }
+        else
+        {
+            std::cout << "Error: " << err.message() << "\n";
+        }
     }
+
+    tcp::resolver resolver_;
+    tcp::acceptor acceptor_;
 };
 
 int main(int argc, char* argv[])
