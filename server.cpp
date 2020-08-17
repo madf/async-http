@@ -97,12 +97,12 @@ private:
             try
             {
                 tcp::resolver::iterator end;
-                tcp::endpoint ep = *endpoint_iterator;
-                acceptor_.open(ep.protocol());
                 while (endpoint_iterator != end)
                 {
+                    tcp::endpoint ep = *endpoint_iterator;
                     try
                     {
+                        acceptor_.open(ep.protocol());
                         acceptor_.bind(ep);
                         acceptor_.listen();
 
@@ -111,9 +111,10 @@ private:
                     }
                     catch (const std::exception& e)
                     {
+                        acceptor_.close();
                         std::cout << "Exception: " << std::string(e.what()) << "\n";
                     }
-                        endpoint_iterator++;
+                    endpoint_iterator++;
                 }
             }
             catch (const std::exception& e)
