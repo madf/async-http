@@ -33,7 +33,8 @@ class tcp_server
 {
 public:
     tcp_server(boost::asio::io_service& io_service, const std::string& host, const std::string& port)
-      : resolver_(io_service),
+      : io_service_(io_service),
+        resolver_(io_service),
         acceptor_(io_service)
     {
         namespace pls = std::placeholders;
@@ -75,10 +76,9 @@ private:
                         acceptor_.listen();
 
                         typedef boost::shared_ptr<tcp::socket> socket_ptr;
-                        boost::asio::io_service io_service;
-                        socket_ptr socket(new tcp::socket(io_service));
+                        socket_ptr socket(new tcp::socket(io_service_));
 
-                        acceptor_.async_accept(*socket, bind(&tcp_server::handle_accept,  this, socket, boost::asio::placeholders::error));
+                        acceptor_.async_accept(*socket, bind(&tcp_server::handle_accept, this, socket, boost::asio::placeholders::error));
                         break;
                     }
                     catch (const std::exception& e)
@@ -100,6 +100,7 @@ private:
         }
     }
 
+    boost::asio::io_service& io_service_;
     tcp::resolver resolver_;
     tcp::acceptor acceptor_;
 };
