@@ -1,5 +1,6 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 #include <iostream>
 #include <string>
 #include <ctime>
@@ -33,7 +34,6 @@ class tcp_server
 public:
     tcp_server(boost::asio::io_service& io_service, const std::string& host, const std::string& port)
       : resolver_(io_service),
-        socket_(io_service),
         acceptor_(io_service)
     {
         namespace pls = std::placeholders;
@@ -45,7 +45,7 @@ public:
 
 private:
 
-    void handle_accept(const error_code& error)
+    void handle_accept(boost::shared_ptr<tcp::socket> socket, const error_code& error)
     {
         if (!error)
         {
@@ -58,38 +58,6 @@ private:
         }
     }
 
-
-/*    void handle_resolve(const error_code& err, tcp::resolver::iterator endpoint_iterator)
-    {
-        if (!err)
-        {
-            tcp::resolver::iterator end;
-            tcp::endpoint ep = *endpoint_iterator;
-            acceptor_.open(ep.protocol());
-            while (endpoint_iterator != end)
-            {
-     std::cout << ep.address().to_string() << "\n";
-                error_code ec;
-                acceptor_.bind(ep, ec);
-                if (!ec)
-                {
-                    acceptor_.listen();
-
-                    acceptor_.async_accept(socket_, bind(&tcp_server::handle_accept,  this, boost::asio::placeholders::error));
-                    break;
-                }
-                else
-                {
-                    std::cout << "Error bind: " << ec.message() << "\n";
-                    endpoint_iterator++;
-                }
-            }
-        }
-        else
-        {
-            std::cout << "Error: " << err.message() << "\n";
-        }
-    }*/
     void handle_resolve(const error_code& err, tcp::resolver::iterator endpoint_iterator)
     {
         if (!err)
@@ -106,7 +74,11 @@ private:
                         acceptor_.bind(ep);
                         acceptor_.listen();
 
-                        acceptor_.async_accept(socket_, bind(&tcp_server::handle_accept,  this, boost::asio::placeholders::error));
+                        typedef boost::shared_ptr<tcp::socket> socket_ptr;
+                        boost::asio::io_service io_service;
+                        socket_ptr socket(new tcp::socket(io_service));
+
+                        acceptor_.async_accept(*socket, bind(&tcp_server::handle_accept,  this, socket, boost::asio::placeholders::error));
                         break;
                     }
                     catch (const std::exception& e)
@@ -129,7 +101,6 @@ private:
     }
 
     tcp::resolver resolver_;
-    tcp::socket socket_;
     tcp::acceptor acceptor_;
 };
 
