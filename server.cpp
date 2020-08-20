@@ -7,6 +7,7 @@
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
+typedef boost::shared_ptr<tcp::socket> socket_ptr;
 
 void reference()
 {
@@ -45,18 +46,39 @@ public:
 
 
 private:
+    void handle_write(const error_code& error, size_t bytes_transferred)
+    {
+        if (error)
+            std::cout << "Error async_write: " << error.message() << "\n";
+        return;
+    }
 
-    void handle_accept(boost::shared_ptr<tcp::socket> socket, const error_code& error)
+    void handle_accept(socket_ptr socket, const error_code& error)
     {
         if (!error)
         {
             std::cout << "Hello, World!" << "\n";
+
+            std::string message = make_daytime_string();
+
+            boost::asio::async_write(*socket, boost::asio::buffer(message),
+                boost::bind(&tcp_server::handle_write, this,
+                  boost::asio::placeholders::error,
+                  boost::asio::placeholders::bytes_transferred));
+
+            start_accept();
         }
         else
         {
             std::cout << "Error async_accept: " << error.message() << "\n";
             return;
         }
+    }
+
+    void start_accept()
+    {
+         socket_ptr socket(new tcp::socket(io_service_));
+         acceptor_.async_accept(*socket, bind(&tcp_server::handle_accept, this, socket, boost::asio::placeholders::error));
     }
 
     void handle_resolve(const error_code& err, tcp::resolver::iterator endpoint_iterator)
@@ -75,10 +97,8 @@ private:
                         acceptor_.bind(ep);
                         acceptor_.listen();
 
-                        typedef boost::shared_ptr<tcp::socket> socket_ptr;
-                        socket_ptr socket(new tcp::socket(io_service_));
+                        start_accept();
 
-                        acceptor_.async_accept(*socket, bind(&tcp_server::handle_accept, this, socket, boost::asio::placeholders::error));
                         break;
                     }
                     catch (const std::exception& e)
