@@ -29,6 +29,10 @@ std::string make_daytime_string()
     strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", timeinfo);
     return buffer;
 }
+std::string make_log_line(const std::string& message)
+{
+    return make_daytime_string() + " " + message + "\n";
+}
 
 class tcp_server
 {
@@ -57,11 +61,10 @@ private:
     {
         if (!error)
         {
-            std::cout << "Hello, World!" << "\n";
+            std::string mes = make_daytime_string();
+            std::cout << make_log_line(socket->remote_endpoint().address().to_string()) << "\n";
 
-            std::string message = make_daytime_string();
-
-            boost::asio::async_write(*socket, boost::asio::buffer(message),
+            boost::asio::async_write(*socket, boost::asio::buffer(mes),
                 boost::bind(&tcp_server::handle_write, this,
                   boost::asio::placeholders::error,
                   boost::asio::placeholders::bytes_transferred));
@@ -127,7 +130,7 @@ private:
 
 int main(int argc, char* argv[])
 {
-    const std::string version = "1.3.0";
+    const std::string version = "1.0.0";
     std::string address;
     std::string outfile;
     std::string work_dir;
