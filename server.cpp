@@ -2,6 +2,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <ctime>
 
@@ -29,6 +30,7 @@ std::string make_daytime_string()
     strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", timeinfo);
     return buffer;
 }
+
 std::string make_log_line(const std::string& message)
 {
     return make_daytime_string() + " " + message + "\n";
@@ -37,19 +39,26 @@ std::string make_log_line(const std::string& message)
 class tcp_server
 {
 public:
-    tcp_server(boost::asio::io_service& io_service, const std::string& host, const std::string& port)
+    tcp_server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile)
       : io_service_(io_service),
         resolver_(io_service),
-        acceptor_(io_service)
+        acceptor_(io_service),
+        outfile_(outfile)
     {
         namespace pls = std::placeholders;
 
         resolver_.async_resolve(tcp::resolver::query(host, port), bind(&tcp_server::handle_resolve, this, pls::_1, pls::_2));
     }
 
-
-
 private:
+    void write_log(const std::string& message)
+    {
+        if (!outfile_.empty())
+            std::ofstream(outfile_, std::ios::app) << make_log_line(message);
+        else
+            std::cout << make_log_line(message);
+    }
+
     void handle_write(const error_code& error, size_t bytes_transferred)
     {
         if (error)
@@ -61,13 +70,13 @@ private:
     {
         if (!error)
         {
-            std::string mes = make_daytime_string();
-            std::cout << make_log_line(socket->remote_endpoint().address().to_string()) << "\n";
+            write_log(socket->remote_endpoint().address().to_string());
 
+            std::string mes = make_daytime_string();
             boost::asio::async_write(*socket, boost::asio::buffer(mes),
                 boost::bind(&tcp_server::handle_write, this,
-                  boost::asio::placeholders::error,
-                  boost::asio::placeholders::bytes_transferred));
+                    boost::asio::placeholders::error,
+                    boost::asio::placeholders::bytes_transferred));
 
             start_accept();
         }
@@ -126,6 +135,7 @@ private:
     boost::asio::io_service& io_service_;
     tcp::resolver resolver_;
     tcp::acceptor acceptor_;
+    std::string& outfile_;
 };
 
 int main(int argc, char* argv[])
@@ -200,7 +210,7 @@ int main(int argc, char* argv[])
     }
 
     boost::asio::io_service io_service;
-    tcp_server server(io_service, host, port);
+    tcp_server server(io_service, host, port, outfile);
     io_service.run();
 
     return 0;
