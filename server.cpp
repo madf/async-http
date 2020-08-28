@@ -59,7 +59,7 @@ private:
             std::cout << make_log_line(message);
     }
 
-    void handle_write(const error_code& error, size_t bytes_transferred)
+    void handle_write(const error_code& error, size_t /*bytes_transferred*/)
     {
         if (error)
             std::cout << "Error async_write: " << error.message() << "\n";
@@ -73,7 +73,7 @@ private:
             write_log(socket->remote_endpoint().address().to_string());
 
             std::string mes = make_daytime_string();
-            boost::asio::async_write(*socket, boost::asio::buffer(mes),
+            boost::asio::async_write(*socket, boost::asio::buffer(mes, mes.size()), boost::asio::transfer_all(),
                 boost::bind(&tcp_server::handle_write, this,
                     boost::asio::placeholders::error,
                     boost::asio::placeholders::bytes_transferred));
