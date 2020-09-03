@@ -1,4 +1,5 @@
 #include "tcpserver.h"
+#include "request.h"
 #include <boost/bind.hpp>
 #include <iostream>
 #include <fstream>
@@ -55,10 +56,10 @@ void Tcpserver::handle_accept(socket_ptr socket, const error_code& error)
         write_log(socket->remote_endpoint().address().to_string());
 
         std::string mes = make_daytime_string();
-        boost::asio::async_write(*socket, boost::asio::buffer(mes, mes.size()), boost::asio::transfer_all(),
-            boost::bind(&Tcpserver::handle_write, this,
-                boost::asio::placeholders::error,
-                boost::asio::placeholders::bytes_transferred));
+        boost::asio::async_write(*socket, boost::asio::buffer(mes, mes.size()),
+                boost::asio::transfer_all(),
+                boost::bind(&Tcpserver::handle_write, this,
+                    boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 
         start_accept();
     }
