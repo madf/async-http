@@ -1,4 +1,5 @@
 #include "tcpserver.h"
+#include "tcpconnection.h"
 #include "request.h"
 #include <boost/bind.hpp>
 #include <iostream>
@@ -7,7 +8,7 @@
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
-typedef boost::shared_ptr<tcp::socket> socket_ptr;
+typedef boost::shared_ptr<Tcpconnection> connection_ptr;
 
 Tcpserver::Tcpserver(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile)
       : io_service_(io_service),
@@ -42,24 +43,13 @@ void Tcpserver::write_log(const std::string& message)
         std::cout << make_log_line(message);
 }
 
-void Tcpserver::handle_write(const error_code& error, size_t /*bytes_transferred*/)
-{
-    if (error)
-        std::cout << "Error async_write: " << error.message() << "\n";
-    return;
-}
-
-void Tcpserver::handle_accept(socket_ptr socket, const error_code& error)
+void Tcpserver::handle_accept(connection_ptr connection, const error_code& error)
 {
     if (!error)
     {
-        write_log(socket->remote_endpoint().address().to_string());
+        write_log(connection->socket().remote_endpoint().address().to_string());
 
-        std::string mes = make_daytime_string();
-        boost::asio::async_write(*socket, boost::asio::buffer(mes, mes.size()),
-                boost::asio::transfer_all(),
-                boost::bind(&Tcpserver::handle_write, this,
-                    boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+        connection->start();
 
         start_accept();
     }
@@ -72,8 +62,8 @@ void Tcpserver::handle_accept(socket_ptr socket, const error_code& error)
 
 void Tcpserver::start_accept()
 {
-     socket_ptr socket(new tcp::socket(io_service_));
-     acceptor_.async_accept(*socket, bind(&Tcpserver::handle_accept, this, socket, boost::asio::placeholders::error));
+     connection_ptr connection(new Tcpconnection(io_service_));
+     acceptor_.async_accept(connection->socket(), bind(&Tcpserver::handle_accept, this, connection, boost::asio::placeholders::error));
 }
 
 void Tcpserver::handle_resolve(const error_code& err, tcp::resolver::iterator endpoint_iterator)
