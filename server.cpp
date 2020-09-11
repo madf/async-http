@@ -2,10 +2,6 @@
 #include <boost/asio.hpp>
 #include <iostream>
 
-using boost::asio::ip::tcp;
-using boost::system::error_code;
-typedef boost::shared_ptr<tcp::socket> socket_ptr;
-
 void reference()
 {
     std::cout << "Usage:\n";
