@@ -13,9 +13,10 @@ class Tcpconnection
         boost::asio::ip::tcp::socket& socket();
 
     private:
+        size_t read_complete(const boost::system::error_code& error, size_t bytes);
 
         void handle_read(const boost::system::error_code& error,
-          size_t /*bytes_transferred*/);
+          size_t bytes);
 
         boost::asio::ip::tcp::socket socket_;
         char buff_[1024];
