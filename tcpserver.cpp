@@ -8,7 +8,7 @@
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
-typedef boost::shared_ptr<Tcpconnection> connection_ptr;
+typedef std::shared_ptr<Tcpconnection> connection_ptr;
 
 Tcpserver::Tcpserver(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile)
       : io_service_(io_service),
