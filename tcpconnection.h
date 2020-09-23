@@ -5,6 +5,7 @@
 #include <string>
 
 class Tcpconnection
+    : public std::enable_shared_from_this<Tcpconnection>
 {
     public:
         Tcpconnection(boost::asio::io_service& io_service);
