@@ -1,5 +1,4 @@
 #include "tcpconnection.h"
-#include <boost/bind.hpp>
 #include <iostream>
 #include <functional> // std::bind
 
@@ -7,8 +6,10 @@
 using boost::asio::ip::tcp;
 using boost::system::error_code;
 
+namespace pls = std::placeholders;
+
 Tcpconnection::Tcpconnection(boost::asio::io_service& io_service)
-: socket_(io_service)
+    : socket_(io_service)
 {
 }
 
@@ -22,16 +23,12 @@ size_t Tcpconnection::read_complete(const error_code& error, size_t bytes)
 
 void Tcpconnection::start()
 {
-    boost::asio::async_read (socket_, boost::asio::buffer(buff_),
-        bind(&Tcpconnection::read_complete, this,
-          boost::asio::placeholders::error,
-          boost::asio::placeholders::bytes_transferred),
-        boost::bind(&Tcpconnection::handle_read, this,
-          boost::asio::placeholders::error,
-          boost::asio::placeholders::bytes_transferred));
+    boost::asio::async_read(socket_, boost::asio::buffer(buff_),
+        bind(&Tcpconnection::read_complete, shared_from_this(), pls::_1, pls::_2),
+        bind(&Tcpconnection::handle_read, shared_from_this(), pls::_1, pls::_2));
 }
 
-void Tcpconnection::handle_read (const error_code& error,
+void Tcpconnection::handle_read(const error_code& error,
   size_t bytes)
 {
     if (error)
