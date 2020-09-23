@@ -39,16 +39,19 @@ void Tcpconnection::handle_read(const error_code& error,
 
     const std::string buff_str(buff_, bytes);
     message_ += buff_str;
-    std::cout << "Message: " << message_ << "\n";
+
     if (bytes < 1024)
     {
         const size_t str_end_pos = message_.find('\r');
         const std::string start_str = message_.substr(0, str_end_pos);
+    std::cout << "Start_str: " << start_str << "\n";
         /*async_write*/
     }
     else
     {
-        /*async_read*/
+        boost::asio::async_read(socket_, boost::asio::buffer(buff_),
+            bind(&Tcpconnection::read_complete, shared_from_this(), pls::_1, pls::_2),
+            bind(&Tcpconnection::handle_read, shared_from_this(), pls::_1, pls::_2));
     }
 }
 
