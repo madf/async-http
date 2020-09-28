@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     }
 
     boost::asio::io_service io_service;
-    Tcpserver server(io_service, host, port, outfile);
+    Tcpserver server(io_service, host, port, outfile, work_dir);
     io_service.run();
 
     return 0;
