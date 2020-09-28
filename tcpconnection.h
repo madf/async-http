@@ -20,6 +20,7 @@ class Tcpconnection
         std::string make_index(DIR *dir, const std::string& path);
         std::string make_response(const Request& request, std::string& work_dir_);
         void handle_read(const boost::system::error_code& error, size_t bytes);
+        void handle_write(const boost::system::error_code& error, size_t /*bytes_transferred*/);
 
         boost::asio::ip::tcp::socket socket_;
         char buff_[1024];
