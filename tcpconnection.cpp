@@ -86,6 +86,15 @@ void Tcpconnection::start()
         bind(&Tcpconnection::handle_read, shared_from_this(), pls::_1, pls::_2));
 }
 
+void Tcpconnection::handle_write(const error_code& error, size_t /*bytes_transferred*/)
+{
+    if (error)
+    {
+        std::cout << "Error async_read: " << error.message() << "\n";
+        return;
+    }
+}
+
 void Tcpconnection::handle_read(const error_code& error, size_t bytes)
 {
     if (error)
@@ -101,9 +110,11 @@ void Tcpconnection::handle_read(const error_code& error, size_t bytes)
     {
         const size_t str_end_pos = message_.find('\r');
         const std::string start_str = message_.substr(0, str_end_pos);
-    std::cout << "Start_str: " << start_str << "\n";
-    std::string msg = make_response(Request(start_str), work_dir_);
+        std::string msg = make_response(Request(start_str), work_dir_);
 
+        boost::asio::async_write(socket_, boost::asio::buffer(msg),
+        boost::asio::transfer_all(),
+        bind(&Tcpconnection::handle_write, shared_from_this(), pls::_1, pls::_2));
     }
     else
     {
