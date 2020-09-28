@@ -10,11 +10,12 @@ using boost::asio::ip::tcp;
 using boost::system::error_code;
 typedef std::shared_ptr<Tcpconnection> connection_ptr;
 
-Tcpserver::Tcpserver(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile)
+Tcpserver::Tcpserver(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile, std::string& work_dir)
       : io_service_(io_service),
         resolver_(io_service),
         acceptor_(io_service),
-        outfile_(outfile)
+        outfile_(outfile),
+        work_dir_(work_dir)
 {
     namespace pls = std::placeholders;
 
@@ -62,7 +63,7 @@ void Tcpserver::handle_accept(connection_ptr connection, const error_code& error
 
 void Tcpserver::start_accept()
 {
-     connection_ptr connection(new Tcpconnection(io_service_));
+     connection_ptr connection(new Tcpconnection(io_service_, work_dir_));
      acceptor_.async_accept(connection->socket(), bind(&Tcpserver::handle_accept, this, connection, boost::asio::placeholders::error));
 }
 
