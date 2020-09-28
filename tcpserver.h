@@ -8,7 +8,7 @@
 class Tcpserver
 {
     public:
-        Tcpserver(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile);
+        Tcpserver(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile, std::string& work_dir);
 
     private:
         std::string make_daytime_string();
@@ -21,7 +21,8 @@ class Tcpserver
         boost::asio::io_service& io_service_;
         boost::asio::ip::tcp::resolver resolver_;
         boost::asio::ip::tcp::acceptor acceptor_;
-        std::string& outfile_;
+        std::string outfile_;
+        std::string work_dir_;
         char buff_[1024];
 };
 
