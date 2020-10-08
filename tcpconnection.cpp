@@ -1,6 +1,12 @@
 #include "tcpconnection.h"
 #include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <cerrno>
 #include <functional> // std::bind
+#include <dirent.h> //struct dirent, opendir, readdir, closedir
+#include <sys/stat.h> //stat, struct stat, open
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
@@ -21,7 +27,13 @@ size_t Tcpconnection::read_complete(const error_code& error, size_t bytes)
     return found ? 0 : 1;
 }
 
-std::string Tcpconnection::make_index(DIR *dir, const std::string& path)
+std::vector<char> Tcpconnection::string_to_vector_char(std::string str)
+{
+    std::vector<char> buffer(str.begin(), str.end());
+    return buffer;
+}
+
+std::vector<char> Tcpconnection::make_index(DIR *dir, const std::string& path)
 {
     std::string lines;
 
@@ -55,28 +67,62 @@ std::string Tcpconnection::make_index(DIR *dir, const std::string& path)
 
     const std::string index =  "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
 
-    return index;
+    return string_to_vector_char(index);
 }
 
-std::string Tcpconnection::make_response(const Request& request, std::string& work_dir_)
+std::vector<char> Tcpconnection::make_response(const Request& request, std::string& work_dir_)
 {
     if (request.verb() != "GET")
-        return "HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n";
+        return string_to_vector_char("HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
 
     if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
-        return "HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/plain\r\n\r\n505 HTTP Version Not Supported.\n";
+        return string_to_vector_char("HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/plain\r\n\r\n505 HTTP Version Not Supported.\n");
 
     const std::string path = work_dir_.empty() ? "." : work_dir_;
-    std::string index;
-    if (request.path() == "/")
+
+    if (request.path() != "/")
+    {
+        int fd = open((path + "/" + request.path()).c_str(), O_RDONLY);
+
+        if (fd == -1)
+        {
+            if (errno == ENOENT)
+                return string_to_vector_char("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
+            else if (errno == EACCES)
+                return string_to_vector_char("HTTP/1.1 403 File access not allowed\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
+            else
+                return string_to_vector_char("HTTP/1.1 500 File open error\r\nContent-Type: text/plain\r\n\r\n500 File open error." + std::string(strerror(errno)) + "\n");
+        }
+
+        std::string ext = request.path().substr(request.path().find(".") + 1);
+
+        for (size_t i = 0; i < ext.length(); i++)
+            ext[i] = tolower(ext[i]);
+
+        std::string header;
+
+        if (ext == "html" || ext == "htm")
+            header =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+
+        header = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n";
+
+        struct stat st;
+        stat((path + "/" + request.path()).c_str(), &st);
+
+        std::vector<char> buff(st.st_size);
+        read(fd, buff.data(), st.st_size);
+        buff.insert(buff.begin(), header.begin(), header.end());
+        return buff;
+    }
+    else
     {
         DIR *dir = opendir(path.c_str());
         if (dir == NULL)
-            return  "HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n";
-        index = make_index(dir, path);
+            return string_to_vector_char("HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
+        std::vector<char> index = make_index(dir, path);
         closedir(dir);
+        return index;
     }
-    return index;
 }
 
 void Tcpconnection::start()
@@ -110,7 +156,7 @@ void Tcpconnection::handle_read(const error_code& error, size_t bytes)
     {
         const size_t str_end_pos = message_.find('\r');
         const std::string start_str = message_.substr(0, str_end_pos);
-        std::string msg = make_response(Request(start_str), work_dir_);
+        std::vector<char> msg = make_response(Request(start_str), work_dir_);
 
         boost::asio::async_write(socket_, boost::asio::buffer(msg),
         boost::asio::transfer_all(),
