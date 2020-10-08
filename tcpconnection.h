@@ -17,8 +17,9 @@ class Tcpconnection
 
     private:
         size_t read_complete(const boost::system::error_code& error, size_t bytes);
-        std::string make_index(DIR *dir, const std::string& path);
-        std::string make_response(const Request& request, std::string& work_dir_);
+        std::vector<char> string_to_vector_char(std::string str);
+        std::vector<char> make_index(DIR *dir, const std::string& path);
+        std::vector<char> make_response(const Request& request, std::string& work_dir_);
         void handle_read(const boost::system::error_code& error, size_t bytes);
         void handle_write(const boost::system::error_code& error, size_t /*bytes_transferred*/);
 
