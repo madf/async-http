@@ -1,20 +1,20 @@
 CXXFLAGS = -W -Wall -Wextra -std=c++11
 LDFLAGS = -lboost_system -lpthread
 
-SOURCES = server.cpp \
+SOURCES = main.cpp \
 		  tcpserver.cpp \
 		  tcpconnection.cpp \
 		  request.cpp
 
 .PHONY: all clean
 
-all: server
+all: main
 
-server: server.o tcpserver.o tcpconnection.o request.o
+main: main.o tcpserver.o tcpconnection.o request.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 clean:
-	rm *.o *.d server
+	rm *.o *.d main
 
 ifneq ($(MAKECMDGOALS),distclean)
 ifneq ($(MAKECMDGOALS),clean)
