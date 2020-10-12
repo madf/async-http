@@ -1,14 +1,14 @@
-#ifndef TCPSERVER_H
-#define TCPSERVER_H
+#ifndef SERVER_H
+#define SERVER_H
 
 #include "tcpconnection.h"
 #include <boost/asio.hpp>
 #include <string>
 
-class Tcpserver
+class Server
 {
     public:
-        Tcpserver(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile, std::string& work_dir);
+        Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile, std::string& work_dir);
 
     private:
         std::string make_daytime_string();
