@@ -10,7 +10,7 @@ using boost::asio::ip::tcp;
 using boost::system::error_code;
 typedef std::shared_ptr<Tcpconnection> connection_ptr;
 
-Tcpserver::Tcpserver(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile, std::string& work_dir)
+Server::Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile, std::string& work_dir)
       : io_service_(io_service),
         resolver_(io_service),
         acceptor_(io_service),
@@ -19,10 +19,10 @@ Tcpserver::Tcpserver(boost::asio::io_service& io_service, const std::string& hos
 {
     namespace pls = std::placeholders;
 
-    resolver_.async_resolve(tcp::resolver::query(host, port), bind(&Tcpserver::handle_resolve, this, pls::_1, pls::_2));
+    resolver_.async_resolve(tcp::resolver::query(host, port), bind(&Server::handle_resolve, this, pls::_1, pls::_2));
 }
 
-std::string Tcpserver::make_daytime_string()
+std::string Server::make_daytime_string()
 {
     char buffer[80];
     time_t now = time(nullptr);
@@ -31,12 +31,12 @@ std::string Tcpserver::make_daytime_string()
     return buffer;
 }
 
-std::string Tcpserver::make_log_line(const std::string& message)
+std::string Server::make_log_line(const std::string& message)
 {
     return make_daytime_string() + " " + message + "\n";
 }
 
-void Tcpserver::write_log(const std::string& message)
+void Server::write_log(const std::string& message)
 {
     if (!outfile_.empty())
         std::ofstream(outfile_, std::ios::app) << make_log_line(message);
@@ -44,7 +44,7 @@ void Tcpserver::write_log(const std::string& message)
         std::cout << make_log_line(message);
 }
 
-void Tcpserver::handle_accept(connection_ptr connection, const error_code& error)
+void Server::handle_accept(connection_ptr connection, const error_code& error)
 {
     if (!error)
     {
@@ -61,13 +61,13 @@ void Tcpserver::handle_accept(connection_ptr connection, const error_code& error
     }
 }
 
-void Tcpserver::start_accept()
+void Server::start_accept()
 {
      connection_ptr connection(new Tcpconnection(io_service_, work_dir_));
-     acceptor_.async_accept(connection->socket(), bind(&Tcpserver::handle_accept, this, connection, boost::asio::placeholders::error));
+     acceptor_.async_accept(connection->socket(), bind(&Server::handle_accept, this, connection, boost::asio::placeholders::error));
 }
 
-void Tcpserver::handle_resolve(const error_code& err, tcp::resolver::iterator endpoint_iterator)
+void Server::handle_resolve(const error_code& err, tcp::resolver::iterator endpoint_iterator)
 {
     if (!err)
     {
