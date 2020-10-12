@@ -1,16 +1,16 @@
-#ifndef TCPCONNECTION_H
-#define TCPCONNECTION_H
+#ifndef CONNECTION_H
+#define CONNECTION_H
 
 #include "request.h"
 #include <boost/asio.hpp>
 #include <string>
 #include <dirent.h> //struct dirent, opendir, readdir, closedir
 
-class Tcpconnection
-    : public std::enable_shared_from_this<Tcpconnection>
+class Connection
+    : public std::enable_shared_from_this<Connection>
 {
     public:
-        Tcpconnection(boost::asio::io_service& io_service, std::string& work_dir);
+        Connection(boost::asio::io_service& io_service, std::string& work_dir);
 
         void start();
         boost::asio::ip::tcp::socket& socket();
