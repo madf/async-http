@@ -8,7 +8,7 @@
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
-typedef std::shared_ptr<Tcpconnection> connection_ptr;
+typedef std::shared_ptr<Connection> connection_ptr;
 
 Server::Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile, std::string& work_dir)
       : io_service_(io_service),
@@ -63,7 +63,7 @@ void Server::handle_accept(connection_ptr connection, const error_code& error)
 
 void Server::start_accept()
 {
-     connection_ptr connection(new Tcpconnection(io_service_, work_dir_));
+     connection_ptr connection(new Connection(io_service_, work_dir_));
      acceptor_.async_accept(connection->socket(), bind(&Server::handle_accept, this, connection, boost::asio::placeholders::error));
 }
 
