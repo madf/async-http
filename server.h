@@ -1,7 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "tcpconnection.h"
+#include "connection.h"
 #include <boost/asio.hpp>
 #include <string>
 
