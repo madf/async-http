@@ -1,5 +1,5 @@
 #include "server.h"
-#include "tcpconnection.h"
+#include "connection.h"
 #include "request.h"
 #include <boost/bind.hpp>
 #include <iostream>
