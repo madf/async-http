@@ -1,4 +1,4 @@
-#include "tcpconnection.h"
+#include "connection.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
