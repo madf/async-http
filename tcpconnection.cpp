@@ -13,13 +13,13 @@ using boost::system::error_code;
 
 namespace pls = std::placeholders;
 
-Tcpconnection::Tcpconnection(boost::asio::io_service& io_service, std::string& work_dir)
+Connection::Connection(boost::asio::io_service& io_service, std::string& work_dir)
     : socket_(io_service),
       work_dir_(work_dir)
 {
 }
 
-size_t Tcpconnection::read_complete(const error_code& error, size_t bytes)
+size_t Connection::read_complete(const error_code& error, size_t bytes)
 {
     if (error) return 0;
     const std::string str = "\r\n\r\n";
@@ -27,13 +27,13 @@ size_t Tcpconnection::read_complete(const error_code& error, size_t bytes)
     return found ? 0 : 1;
 }
 
-std::vector<char> Tcpconnection::string_to_vector_char(std::string str)
+std::vector<char> Connection::string_to_vector_char(std::string str)
 {
     std::vector<char> buffer(str.begin(), str.end());
     return buffer;
 }
 
-std::vector<char> Tcpconnection::make_index(DIR *dir, const std::string& path)
+std::vector<char> Connection::make_index(DIR *dir, const std::string& path)
 {
     std::string lines;
 
@@ -70,7 +70,7 @@ std::vector<char> Tcpconnection::make_index(DIR *dir, const std::string& path)
     return string_to_vector_char(index);
 }
 
-std::vector<char> Tcpconnection::make_response(const Request& request, std::string& work_dir_)
+std::vector<char> Connection::make_response(const Request& request, std::string& work_dir_)
 {
     if (request.verb() != "GET")
         return string_to_vector_char("HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
@@ -125,14 +125,14 @@ std::vector<char> Tcpconnection::make_response(const Request& request, std::stri
     }
 }
 
-void Tcpconnection::start()
+void Connection::start()
 {
     boost::asio::async_read(socket_, boost::asio::buffer(buff_),
-        bind(&Tcpconnection::read_complete, shared_from_this(), pls::_1, pls::_2),
-        bind(&Tcpconnection::handle_read, shared_from_this(), pls::_1, pls::_2));
+        bind(&Connection::read_complete, shared_from_this(), pls::_1, pls::_2),
+        bind(&Connection::handle_read, shared_from_this(), pls::_1, pls::_2));
 }
 
-void Tcpconnection::handle_write(const error_code& error, size_t /*bytes_transferred*/)
+void Connection::handle_write(const error_code& error, size_t /*bytes_transferred*/)
 {
     if (error)
     {
@@ -141,7 +141,7 @@ void Tcpconnection::handle_write(const error_code& error, size_t /*bytes_transfe
     }
 }
 
-void Tcpconnection::handle_read(const error_code& error, size_t bytes)
+void Connection::handle_read(const error_code& error, size_t bytes)
 {
     if (error)
     {
@@ -160,17 +160,17 @@ void Tcpconnection::handle_read(const error_code& error, size_t bytes)
 
         boost::asio::async_write(socket_, boost::asio::buffer(msg),
         boost::asio::transfer_all(),
-        bind(&Tcpconnection::handle_write, shared_from_this(), pls::_1, pls::_2));
+        bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
     }
     else
     {
         boost::asio::async_read(socket_, boost::asio::buffer(buff_),
-            bind(&Tcpconnection::read_complete, shared_from_this(), pls::_1, pls::_2),
-            bind(&Tcpconnection::handle_read, shared_from_this(), pls::_1, pls::_2));
+            bind(&Connection::read_complete, shared_from_this(), pls::_1, pls::_2),
+            bind(&Connection::handle_read, shared_from_this(), pls::_1, pls::_2));
     }
 }
 
-tcp::socket& Tcpconnection::socket()
+tcp::socket& Connection::socket()
 {
     return socket_;
 }
