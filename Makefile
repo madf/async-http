@@ -3,14 +3,14 @@ LDFLAGS = -lboost_system -lpthread
 
 SOURCES = main.cpp \
 		  server.cpp \
-		  tcpconnection.cpp \
+		  connection.cpp \
 		  request.cpp
 
 .PHONY: all clean
 
 all: main
 
-main: main.o server.o tcpconnection.o request.o
+main: main.o server.o connection.o request.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 clean:
