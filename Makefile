@@ -8,13 +8,13 @@ SOURCES = main.cpp \
 
 .PHONY: all clean
 
-all: main
+all: server
 
-main: main.o server.o connection.o request.o
+server: main.o server.o connection.o request.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 clean:
-	rm *.o *.d main
+	rm *.o *.d server
 
 ifneq ($(MAKECMDGOALS),distclean)
 ifneq ($(MAKECMDGOALS),clean)
