@@ -1,5 +1,4 @@
 #include "server.h"
-#include "connection.h"
 #include "request.h"
 #include <boost/bind.hpp>
 #include <iostream>
