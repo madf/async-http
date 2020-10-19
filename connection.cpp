@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cerrno>
 #include <functional> // std::bind
-#include <dirent.h> //struct dirent, opendir, readdir, closedir
 #include <sys/stat.h> //stat, struct stat, open
 
 using boost::asio::ip::tcp;
@@ -31,6 +30,43 @@ std::vector<char> Connection::string_to_vector_char(std::string str)
 {
     std::vector<char> buffer(str.begin(), str.end());
     return buffer;
+}
+
+
+std::vector<char> Connection::read_file(const Request& request, const std::string& path)
+{
+    int fd = open((path + "/" + request.path()).c_str(), O_RDONLY);
+
+    if (fd == -1)
+    {
+        if (errno == ENOENT)
+            return string_to_vector_char("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
+        else if (errno == EACCES)
+            return string_to_vector_char("HTTP/1.1 403 File access not allowed\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
+        else
+            return string_to_vector_char("HTTP/1.1 500 File open error\r\nContent-Type: text/plain\r\n\r\n500 File open error." + std::string(strerror(errno)) + "\n");
+    }
+
+    std::string ext = request.path().substr(request.path().find(".") + 1);
+
+    for (size_t i = 0; i < ext.length(); i++)
+        ext[i] = tolower(ext[i]);
+
+    std::string header;
+
+    if (ext == "html" || ext == "htm")
+        header =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+    else
+        header = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n";
+
+    struct stat st;
+    if (stat((path + "/" + request.path()).c_str(), &st) < 0)
+        return string_to_vector_char("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
+
+    std::vector<char> buff(st.st_size);
+    read(fd, buff.data(), st.st_size);
+    buff.insert(buff.begin(), header.begin(), header.end());
+    return buff;
 }
 
 std::vector<char> Connection::make_index(DIR *dir, const std::string& path)
@@ -82,37 +118,7 @@ std::vector<char> Connection::make_response(const Request& request, std::string&
 
     if (request.path() != "/")
     {
-        int fd = open((path + "/" + request.path()).c_str(), O_RDONLY);
-
-        if (fd == -1)
-        {
-            if (errno == ENOENT)
-                return string_to_vector_char("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
-            else if (errno == EACCES)
-                return string_to_vector_char("HTTP/1.1 403 File access not allowed\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
-            else
-                return string_to_vector_char("HTTP/1.1 500 File open error\r\nContent-Type: text/plain\r\n\r\n500 File open error." + std::string(strerror(errno)) + "\n");
-        }
-
-        std::string ext = request.path().substr(request.path().find(".") + 1);
-
-        for (size_t i = 0; i < ext.length(); i++)
-            ext[i] = tolower(ext[i]);
-
-        std::string header;
-
-        if (ext == "html" || ext == "htm")
-            header =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-
-        header = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n";
-
-        struct stat st;
-        stat((path + "/" + request.path()).c_str(), &st);
-
-        std::vector<char> buff(st.st_size);
-        read(fd, buff.data(), st.st_size);
-        buff.insert(buff.begin(), header.begin(), header.end());
-        return buff;
+        return read_file(request.path(), path);
     }
     else
     {
