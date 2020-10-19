@@ -18,6 +18,7 @@ class Connection
     private:
         size_t read_complete(const boost::system::error_code& error, size_t bytes);
         std::vector<char> string_to_vector_char(std::string str);
+        std::vector<char> read_file(const Request& request, const std::string& path);
         std::vector<char> make_index(DIR *dir, const std::string& path);
         std::vector<char> make_response(const Request& request, std::string& work_dir_);
         void handle_read(const boost::system::error_code& error, size_t bytes);
