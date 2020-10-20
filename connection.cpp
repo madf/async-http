@@ -64,9 +64,18 @@ std::vector<char> Connection::read_file(const Request& request, const std::strin
         return string_to_vector_char("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
 
     std::vector<char> buff(st.st_size);
-    read(fd, buff.data(), st.st_size);
-    buff.insert(buff.begin(), header.begin(), header.end());
-    return buff;
+    if (read(fd, buff.data(), st.st_size) >= 0)
+    {
+        buff.insert(buff.begin(), header.begin(), header.end());
+        return buff;
+    }
+    else
+    {
+        if (errno == EACCES)
+            return string_to_vector_char("HTTP/1.1 403 File access not allowed.\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
+        else
+            return string_to_vector_char("HTTP/1.1 500 The file descriptor is invalid.\r\nContent-Type: text/plain\r\n\r\n500 The file descriptor is invalid." + std::string(strerror(errno)) + "\n");
+    }
 }
 
 std::vector<char> Connection::make_index(DIR *dir, const std::string& path)
