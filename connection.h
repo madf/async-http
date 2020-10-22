@@ -28,6 +28,7 @@ class Connection
         char buff_[1024];
         std::string message_;
         std::string work_dir_;
+        std::vector<char> msg_;
 };
 
 #endif
