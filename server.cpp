@@ -9,7 +9,7 @@ using boost::asio::ip::tcp;
 using boost::system::error_code;
 typedef std::shared_ptr<Connection> connection_ptr;
 
-Server::Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile, std::string& work_dir)
+Server::Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, const std::string& outfile, const std::string& work_dir)
       : io_service_(io_service),
         resolver_(io_service),
         acceptor_(io_service),
