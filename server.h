@@ -8,7 +8,7 @@
 class Server
 {
     public:
-        Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, std::string& outfile, std::string& work_dir);
+        Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, const std::string& outfile, const std::string& work_dir);
 
     private:
         std::string make_daytime_string();
