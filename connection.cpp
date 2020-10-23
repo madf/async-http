@@ -12,7 +12,7 @@ using boost::system::error_code;
 
 namespace pls = std::placeholders;
 
-Connection::Connection(boost::asio::io_service& io_service, std::string& work_dir)
+Connection::Connection(boost::asio::io_service& io_service, const std::string& work_dir)
     : socket_(io_service),
       work_dir_(work_dir)
 {
@@ -26,7 +26,7 @@ size_t Connection::read_complete(const error_code& error, size_t bytes)
     return found ? 0 : 1;
 }
 
-std::vector<char> Connection::string_to_vector_char(std::string str)
+std::vector<char> Connection::string_to_vector_char(const std::string str)
 {
     std::vector<char> buffer(str.begin(), str.end());
     return buffer;
@@ -115,7 +115,7 @@ std::vector<char> Connection::make_index(DIR *dir, const std::string& path)
     return string_to_vector_char(index);
 }
 
-std::vector<char> Connection::make_response(const Request& request, std::string& work_dir_)
+std::vector<char> Connection::make_response(const Request& request, const std::string& work_dir_)
 {
     if (request.verb() != "GET")
         return string_to_vector_char("HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
