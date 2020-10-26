@@ -26,10 +26,9 @@ size_t Connection::read_complete(const error_code& error, size_t bytes)
     return found ? 0 : 1;
 }
 
-std::vector<char> Connection::string_to_vector_char(const std::string str)
+Data Connection::toData(const std::string& source)
 {
-    std::vector<char> buffer(str.begin(), str.end());
-    return buffer;
+    return Data(source.begin(), source.end());
 }
 
 
@@ -40,11 +39,11 @@ std::vector<char> Connection::read_file(const Request& request, const std::strin
     if (fd == -1)
     {
         if (errno == ENOENT)
-            return string_to_vector_char("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
+            return toData("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
         else if (errno == EACCES)
-            return string_to_vector_char("HTTP/1.1 403 File access not allowed\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
+            return toData("HTTP/1.1 403 File access not allowed\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
         else
-            return string_to_vector_char("HTTP/1.1 500 File open error\r\nContent-Type: text/plain\r\n\r\n500 File open error." + std::string(strerror(errno)) + "\n");
+            return toData("HTTP/1.1 500 File open error\r\nContent-Type: text/plain\r\n\r\n500 File open error." + std::string(strerror(errno)) + "\n");
     }
 
     std::string ext = request.path().substr(request.path().find(".") + 1);
@@ -61,7 +60,7 @@ std::vector<char> Connection::read_file(const Request& request, const std::strin
 
     struct stat st;
     if (stat((path + "/" + request.path()).c_str(), &st) < 0)
-        return string_to_vector_char("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
+        return toData("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
 
     std::vector<char> buff(st.st_size);
     if (read(fd, buff.data(), st.st_size) >= 0)
@@ -72,9 +71,9 @@ std::vector<char> Connection::read_file(const Request& request, const std::strin
     else
     {
         if (errno == EACCES)
-            return string_to_vector_char("HTTP/1.1 403 File access not allowed.\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
+            return toData("HTTP/1.1 403 File access not allowed.\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
         else
-            return string_to_vector_char("HTTP/1.1 500 The file descriptor is invalid.\r\nContent-Type: text/plain\r\n\r\n500 The file descriptor is invalid." + std::string(strerror(errno)) + "\n");
+            return toData("HTTP/1.1 500 The file descriptor is invalid.\r\nContent-Type: text/plain\r\n\r\n500 The file descriptor is invalid." + std::string(strerror(errno)) + "\n");
     }
 }
 
@@ -112,16 +111,16 @@ std::vector<char> Connection::make_index(DIR *dir, const std::string& path)
 
     const std::string index =  "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
 
-    return string_to_vector_char(index);
+    return toData(index);
 }
 
 std::vector<char> Connection::make_response(const Request& request, const std::string& work_dir_)
 {
     if (request.verb() != "GET")
-        return string_to_vector_char("HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
+        return toData("HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
 
     if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
-        return string_to_vector_char("HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/plain\r\n\r\n505 HTTP Version Not Supported.\n");
+        return toData("HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/plain\r\n\r\n505 HTTP Version Not Supported.\n");
 
     const std::string path = work_dir_.empty() ? "." : work_dir_;
 
@@ -133,7 +132,7 @@ std::vector<char> Connection::make_response(const Request& request, const std::s
     {
         DIR *dir = opendir(path.c_str());
         if (dir == NULL)
-            return string_to_vector_char("HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
+            return toData("HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
         std::vector<char> index = make_index(dir, path);
         closedir(dir);
         return index;
