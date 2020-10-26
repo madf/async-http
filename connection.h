@@ -6,6 +6,8 @@
 #include <string>
 #include <dirent.h> //struct dirent, opendir, readdir, closedir
 
+using Data = std::vector<char>;
+
 class Connection
     : public std::enable_shared_from_this<Connection>
 {
@@ -17,7 +19,7 @@ class Connection
 
     private:
         size_t read_complete(const boost::system::error_code& error, size_t bytes);
-        std::vector<char> string_to_vector_char(const std::string str);
+        Data toData(const std::string& source);
         std::vector<char> read_file(const Request& request, const std::string& path);
         std::vector<char> make_index(DIR *dir, const std::string& path);
         std::vector<char> make_response(const Request& request, const std::string& work_dir_);
