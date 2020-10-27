@@ -32,7 +32,7 @@ Data Connection::toData(const std::string& source)
 }
 
 
-std::vector<char> Connection::read_file(const Request& request, const std::string& path)
+Data Connection::read_file(const Request& request, const std::string& path)
 {
     int fd = open((path + "/" + request.path()).c_str(), O_RDONLY);
 
@@ -62,7 +62,7 @@ std::vector<char> Connection::read_file(const Request& request, const std::strin
     if (stat((path + "/" + request.path()).c_str(), &st) < 0)
         return toData("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
 
-    std::vector<char> buff(st.st_size);
+    Data buff(st.st_size);
     if (read(fd, buff.data(), st.st_size) >= 0)
     {
         buff.insert(buff.begin(), header.begin(), header.end());
@@ -77,7 +77,7 @@ std::vector<char> Connection::read_file(const Request& request, const std::strin
     }
 }
 
-std::vector<char> Connection::make_index(DIR *dir, const std::string& path)
+Data Connection::make_index(DIR *dir, const std::string& path)
 {
     std::string lines;
 
@@ -114,7 +114,7 @@ std::vector<char> Connection::make_index(DIR *dir, const std::string& path)
     return toData(index);
 }
 
-std::vector<char> Connection::make_response(const Request& request, const std::string& work_dir_)
+Data Connection::make_response(const Request& request, const std::string& work_dir_)
 {
     if (request.verb() != "GET")
         return toData("HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
@@ -133,7 +133,7 @@ std::vector<char> Connection::make_response(const Request& request, const std::s
         DIR *dir = opendir(path.c_str());
         if (dir == NULL)
             return toData("HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
-        std::vector<char> index = make_index(dir, path);
+        Data index = make_index(dir, path);
         closedir(dir);
         return index;
     }
