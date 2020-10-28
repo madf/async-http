@@ -32,9 +32,9 @@ Data Connection::toData(const std::string& source)
 }
 
 
-Data Connection::read_file(const Request& request, const std::string& path)
+Data Connection::read_file(const std::string& path)
 {
-    int fd = open((path + "/" + request.path()).c_str(), O_RDONLY);
+    int fd = open(path.c_str(), O_RDONLY);
 
     if (fd == -1)
     {
@@ -46,20 +46,19 @@ Data Connection::read_file(const Request& request, const std::string& path)
             return toData("HTTP/1.1 500 File open error\r\nContent-Type: text/plain\r\n\r\n500 File open error." + std::string(strerror(errno)) + "\n");
     }
 
-    std::string ext = request.path().substr(request.path().find(".") + 1);
+    std::string ext = path.substr(path.rfind(".") + 1);
 
     for (size_t i = 0; i < ext.length(); i++)
         ext[i] = tolower(ext[i]);
 
     std::string header;
-
     if (ext == "html" || ext == "htm")
         header =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
     else
         header = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n";
 
     struct stat st;
-    if (stat((path + "/" + request.path()).c_str(), &st) < 0)
+    if (stat(path.c_str(), &st) < 0)
         return toData("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
 
     Data buff(st.st_size);
@@ -126,7 +125,8 @@ Data Connection::make_response(const Request& request, const std::string& work_d
 
     if (request.path() != "/")
     {
-        return read_file(request.path(), path);
+        return read_file(path + "/" + request.path());
+        //return read_file(request.path(), path);
     }
     else
     {
