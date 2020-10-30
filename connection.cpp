@@ -31,19 +31,22 @@ Data Connection::toData(const std::string& source)
     return Data(source.begin(), source.end());
 }
 
+Data Connection::makeError(unsigned code, const std::string& title, const std::string& path, const std::string& message)
+{
+    return toData("HTTP/1.1 " + std::to_string(code) + " " + title + "\r\nContent-Type: text/plain\r\n\r\n" + (path.substr(path.find_last_of('/') + 1)) + ": " + message + "\n");
+}
 
 Data Connection::read_file(const std::string& path)
 {
     int fd = open(path.c_str(), O_RDONLY);
-
     if (fd == -1)
     {
         if (errno == ENOENT)
-            return toData("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
+            return makeError(404, "File does not exist", path, "404 File does not exist.");
         else if (errno == EACCES)
-            return toData("HTTP/1.1 403 File access not allowed\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
+            return makeError(403, "File access not allowed", path, "403 File access not allowed.");
         else
-            return toData("HTTP/1.1 500 File open error\r\nContent-Type: text/plain\r\n\r\n500 File open error." + std::string(strerror(errno)) + "\n");
+            return makeError(500, "File open error", path, "500 File open error." + std::string(strerror(errno)));
     }
 
     std::string ext = path.substr(path.rfind(".") + 1);
@@ -59,7 +62,7 @@ Data Connection::read_file(const std::string& path)
 
     struct stat st;
     if (stat(path.c_str(), &st) < 0)
-        return toData("HTTP/1.1 404 File does not exist\r\nContent-Type: text/plain\r\n\r\n404 File does not exist.\n");
+        return makeError(404, "File does not exist", path, "404 File does not exist.");
 
     Data buff(st.st_size);
     if (read(fd, buff.data(), st.st_size) >= 0)
@@ -70,9 +73,9 @@ Data Connection::read_file(const std::string& path)
     else
     {
         if (errno == EACCES)
-            return toData("HTTP/1.1 403 File access not allowed.\r\nContent-Type: text/plain\r\n\r\n403 File access not allowed.\n");
+            return makeError(403, "File access not allowed", path, "403 File access not allowed.");
         else
-            return toData("HTTP/1.1 500 The file descriptor is invalid.\r\nContent-Type: text/plain\r\n\r\n500 The file descriptor is invalid." + std::string(strerror(errno)) + "\n");
+            return makeError(500, "The file descriptor is invalid.", path, "500 The file descriptor is invalid." + std::string(strerror(errno)));
     }
 }
 
@@ -126,7 +129,6 @@ Data Connection::make_response(const Request& request, const std::string& work_d
     if (request.path() != "/")
     {
         return read_file(path + "/" + request.path());
-        //return read_file(request.path(), path);
     }
     else
     {
