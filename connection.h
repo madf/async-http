@@ -20,7 +20,7 @@ class Connection
     private:
         size_t read_complete(const boost::system::error_code& error, size_t bytes);
         Data toData(const std::string& source);
-        Data makeError(unsigned code, const std::string& title, const std::string& path, const std::string& message);
+        Data makeError(unsigned code, const std::string& title, const std::string& message);
         Data read_file(const std::string& path);
         Data make_index(DIR *dir, const std::string& path);
         Data make_response(const Request& request, const std::string& work_dir_);
