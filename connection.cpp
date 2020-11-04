@@ -36,6 +36,13 @@ Data Connection::makeError(unsigned code, const std::string& title, const std::s
     return toData("HTTP/1.1 " + std::to_string(code) + " " + title + "\r\nContent-Type: text/plain\r\n\r\n"  + message + "\n");
 }
 
+std::string Connection::string_to_lower(std::string str)
+{
+    for (size_t i = 0; i < str.length(); i++)
+        str[i] = tolower(str[i]);
+    return str;
+}
+
 Data Connection::read_file(const std::string& path)
 {
     int fd = open(path.c_str(), O_RDONLY);
@@ -49,10 +56,7 @@ Data Connection::read_file(const std::string& path)
             return makeError(500, "File open error", path + ": 500 File open error." + std::string(strerror(errno)));
     }
 
-    std::string ext = path.substr(path.rfind(".") + 1);
-
-    for (size_t i = 0; i < ext.length(); i++)
-        ext[i] = tolower(ext[i]);
+    std::string ext = string_to_lower(path.substr(path.rfind(".") + 1));
 
     std::string header;
     if (ext == "html" || ext == "htm")
@@ -62,20 +66,30 @@ Data Connection::read_file(const std::string& path)
 
     struct stat st;
     if (stat(path.c_str(), &st) < 0)
+    {
+        close(fd);
         return makeError(404, "File does not exist", path + ": 404 File does not exist.");
+    }
 
     Data buff(st.st_size);
     if (read(fd, buff.data(), st.st_size) >= 0)
     {
         buff.insert(buff.begin(), header.begin(), header.end());
+        close(fd);
         return buff;
     }
     else
     {
         if (errno == EACCES)
+        {
+            close(fd);
             return makeError(403, "File access not allowed", path + ": 403 File access not allowed.");
+        }
         else
+        {
+            close(fd);
             return makeError(500, "The file descriptor is invalid.", path + ": 500 The file descriptor is invalid." + std::string(strerror(errno)));
+        }
     }
 }
 
