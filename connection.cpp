@@ -13,9 +13,9 @@ using boost::system::error_code;
 namespace pls = std::placeholders;
 
 Connection::Connection(boost::asio::io_service& io_service, const std::string& work_dir)
-    : socket_(io_service),
-      work_dir_(work_dir)
+    : socket_(io_service)
 {
+    work_dir_ = work_dir.empty() ? "." : work_dir;
 }
 
 size_t Connection::read_complete(const error_code& error, size_t bytes)
@@ -93,7 +93,7 @@ Data Connection::read_file(const std::string& path)
     }
 }
 
-Data Connection::make_index(DIR *dir, const std::string& path)
+Data Connection::make_index(DIR *dir)
 {
     std::string lines;
 
@@ -104,7 +104,7 @@ Data Connection::make_index(DIR *dir, const std::string& path)
             const std::string file_name = entry->d_name;
 
             struct stat st;
-            if (stat((path + "/" + file_name).c_str(), &st) < 0)
+            if (stat((work_dir_ + "/" + file_name).c_str(), &st) < 0)
             {
                 lines = lines + "<tr><td>" + file_name + "</td><td>?</td><td>?</td></tr>";
             }
@@ -130,7 +130,7 @@ Data Connection::make_index(DIR *dir, const std::string& path)
     return toData(index);
 }
 
-Data Connection::make_response(const Request& request, const std::string& work_dir_)
+Data Connection::make_response(const Request& request)
 {
     if (request.verb() != "GET")
         return toData("HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
@@ -138,18 +138,16 @@ Data Connection::make_response(const Request& request, const std::string& work_d
     if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
         return toData("HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/plain\r\n\r\n505 HTTP Version Not Supported.\n");
 
-    const std::string path = work_dir_.empty() ? "." : work_dir_;
-
     if (request.path() != "/")
     {
-        return read_file(path + "/" + request.path());
+        return read_file(work_dir_ + "/" + request.path());
     }
     else
     {
-        DIR *dir = opendir(path.c_str());
+        DIR *dir = opendir(work_dir_.c_str());
         if (dir == NULL)
             return toData("HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
-        Data index = make_index(dir, path);
+        Data index = make_index(dir);
         closedir(dir);
         return index;
     }
@@ -186,7 +184,7 @@ void Connection::handle_read(const error_code& error, size_t bytes)
     {
         const size_t str_end_pos = message_.find('\r');
         const std::string start_str = message_.substr(0, str_end_pos);
-        msg_ = make_response(Request(start_str), work_dir_);
+        msg_ = make_response(Request(start_str));
 
         boost::asio::async_write(socket_, boost::asio::buffer(msg_, msg_.size()),
         boost::asio::transfer_all(),
