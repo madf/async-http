@@ -21,6 +21,7 @@ class Connection
         size_t read_complete(const boost::system::error_code& error, size_t bytes);
         Data toData(const std::string& source);
         Data makeError(unsigned code, const std::string& title, const std::string& message);
+        std::string string_to_lower(std::string str);
         Data read_file(const std::string& path);
         Data make_index(DIR *dir, const std::string& path);
         Data make_response(const Request& request, const std::string& work_dir_);
