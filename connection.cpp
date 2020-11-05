@@ -177,8 +177,7 @@ void Connection::handle_read(const error_code& error, size_t bytes)
         return;
     }
 
-    const std::string buff_str(buff_, bytes);
-    message_ += buff_str;
+    message_.append(buff_, bytes);
 
     if (bytes < 1024)
     {
