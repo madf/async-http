@@ -26,14 +26,14 @@ size_t Connection::read_complete(const error_code& error, size_t bytes)
     return found ? 0 : 1;
 }
 
-Data Connection::toData(const std::string& source)
+Data Connection::to_data(const std::string& source)
 {
     return Data(source.begin(), source.end());
 }
 
-Data Connection::makeError(unsigned code, const std::string& title, const std::string& message)
+Data Connection::make_error(unsigned code, const std::string& title, const std::string& message)
 {
-    return toData("HTTP/1.1 " + std::to_string(code) + " " + title + "\r\nContent-Type: text/plain\r\n\r\n"  + message + "\n");
+    return to_data("HTTP/1.1 " + std::to_string(code) + " " + title + "\r\nContent-Type: text/plain\r\n\r\n"  + message + "\n");
 }
 
 std::string Connection::string_to_lower(std::string str)
@@ -49,11 +49,11 @@ Data Connection::read_file(const std::string& path)
     if (fd == -1)
     {
         if (errno == ENOENT)
-            return makeError(404, "File does not exist", path + ": 404 File does not exist.");
+            return make_error(404, "File does not exist", path + ": 404 File does not exist.");
         else if (errno == EACCES)
-            return makeError(403, "File access not allowed", path + ": 403 File access not allowed.");
+            return make_error(403, "File access not allowed", path + ": 403 File access not allowed.");
         else
-            return makeError(500, "File open error", path + ": 500 File open error." + std::string(strerror(errno)));
+            return make_error(500, "File open error", path + ": 500 File open error." + std::string(strerror(errno)));
     }
 
     std::string ext = string_to_lower(path.substr(path.rfind(".") + 1));
@@ -68,7 +68,7 @@ Data Connection::read_file(const std::string& path)
     if (stat(path.c_str(), &st) < 0)
     {
         close(fd);
-        return makeError(404, "File does not exist", path + ": 404 File does not exist.");
+        return make_error(404, "File does not exist", path + ": 404 File does not exist.");
     }
 
     Data buff(st.st_size);
@@ -83,12 +83,12 @@ Data Connection::read_file(const std::string& path)
         if (errno == EACCES)
         {
             close(fd);
-            return makeError(403, "File access not allowed", path + ": 403 File access not allowed.");
+            return make_error(403, "File access not allowed", path + ": 403 File access not allowed.");
         }
         else
         {
             close(fd);
-            return makeError(500, "The file descriptor is invalid.", path + ": 500 The file descriptor is invalid." + std::string(strerror(errno)));
+            return make_error(500, "The file descriptor is invalid.", path + ": 500 The file descriptor is invalid." + std::string(strerror(errno)));
         }
     }
 }
@@ -127,16 +127,16 @@ Data Connection::make_index(DIR *dir)
 
     const std::string index =  "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n" + table_html;
 
-    return toData(index);
+    return to_data(index);
 }
 
 Data Connection::make_response(const Request& request)
 {
     if (request.verb() != "GET")
-        return toData("HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
+        return to_data("HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
 
     if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
-        return toData("HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/plain\r\n\r\n505 HTTP Version Not Supported.\n");
+        return to_data("HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/plain\r\n\r\n505 HTTP Version Not Supported.\n");
 
     if (request.path() != "/")
     {
@@ -146,7 +146,7 @@ Data Connection::make_response(const Request& request)
     {
         DIR *dir = opendir(work_dir_.c_str());
         if (dir == NULL)
-            return toData("HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
+            return to_data("HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
         Data index = make_index(dir);
         closedir(dir);
         return index;
