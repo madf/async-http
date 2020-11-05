@@ -1,6 +1,6 @@
 #include "server.h"
 #include "request.h"
-#include <boost/bind.hpp>
+#include <functional> //std::bind
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -9,6 +9,8 @@ using boost::asio::ip::tcp;
 using boost::system::error_code;
 typedef std::shared_ptr<Connection> connection_ptr;
 
+namespace pls = std::placeholders;
+
 Server::Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, const std::string& outfile, const std::string& work_dir)
       : io_service_(io_service),
         resolver_(io_service),
@@ -16,8 +18,6 @@ Server::Server(boost::asio::io_service& io_service, const std::string& host, con
         outfile_(outfile),
         work_dir_(work_dir)
 {
-    namespace pls = std::placeholders;
-
     resolver_.async_resolve(tcp::resolver::query(host, port), bind(&Server::handle_resolve, this, pls::_1, pls::_2));
 }
 
@@ -63,7 +63,7 @@ void Server::handle_accept(connection_ptr connection, const error_code& error)
 void Server::start_accept()
 {
      connection_ptr connection(new Connection(io_service_, work_dir_));
-     acceptor_.async_accept(connection->socket(), bind(&Server::handle_accept, this, connection, boost::asio::placeholders::error));
+     acceptor_.async_accept(connection->socket(), bind(&Server::handle_accept, this, connection, pls::_1));
 }
 
 void Server::handle_resolve(const error_code& err, tcp::resolver::iterator endpoint_iterator)
