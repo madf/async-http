@@ -183,9 +183,9 @@ void Connection::handle_read(const error_code& error, size_t bytes)
     {
         const size_t str_end_pos = message_.find('\r');
         const std::string start_str = message_.substr(0, str_end_pos);
-        msg_ = make_response(Request(start_str));
+        response_ = make_response(Request(start_str));
 
-        boost::asio::async_write(socket_, boost::asio::buffer(msg_),
+        boost::asio::async_write(socket_, boost::asio::buffer(response_),
         boost::asio::transfer_all(),
         bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
     }
