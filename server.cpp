@@ -11,6 +11,15 @@ typedef std::shared_ptr<Connection> connection_ptr;
 
 namespace pls = std::placeholders;
 
+std::string make_daytime_string()
+{
+    char buffer[80];
+    time_t now = time(nullptr);
+    struct tm* timeinfo = localtime(&now);
+    strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", timeinfo);
+    return buffer;
+}
+
 Server::Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, const std::string& outfile, const std::string& work_dir)
       : io_service_(io_service),
         resolver_(io_service),
@@ -19,15 +28,6 @@ Server::Server(boost::asio::io_service& io_service, const std::string& host, con
         work_dir_(work_dir)
 {
     resolver_.async_resolve(tcp::resolver::query(host, port), bind(&Server::handle_resolve, this, pls::_1, pls::_2));
-}
-
-std::string Server::make_daytime_string()
-{
-    char buffer[80];
-    time_t now = time(nullptr);
-    struct tm* timeinfo = localtime(&now);
-    strftime(buffer, 80, "%Y-%m-%d %H:%M:%S", timeinfo);
-    return buffer;
 }
 
 std::string Server::make_log_line(const std::string& message)
