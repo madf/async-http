@@ -20,6 +20,11 @@ std::string make_daytime_string()
     return buffer;
 }
 
+std::string make_log_line(const std::string& message)
+{
+    return make_daytime_string() + " " + message + "\n";
+}
+
 Server::Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, const std::string& outfile, const std::string& work_dir)
       : io_service_(io_service),
         resolver_(io_service),
@@ -28,11 +33,6 @@ Server::Server(boost::asio::io_service& io_service, const std::string& host, con
         work_dir_(work_dir)
 {
     resolver_.async_resolve(tcp::resolver::query(host, port), bind(&Server::handle_resolve, this, pls::_1, pls::_2));
-}
-
-std::string Server::make_log_line(const std::string& message)
-{
-    return make_daytime_string() + " " + message + "\n";
 }
 
 void Server::write_log(const std::string& message)
