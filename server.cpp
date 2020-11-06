@@ -70,33 +70,26 @@ void Server::handle_resolve(const error_code& err, tcp::resolver::iterator endpo
 {
     if (!err)
     {
-        try
+        tcp::resolver::iterator end;
+        while (endpoint_iterator != end)
         {
-            tcp::resolver::iterator end;
-            while (endpoint_iterator != end)
+            tcp::endpoint ep = *endpoint_iterator;
+            try
             {
-                tcp::endpoint ep = *endpoint_iterator;
-                try
-                {
-                    acceptor_.open(ep.protocol());
-                    acceptor_.bind(ep);
-                    acceptor_.listen();
+                acceptor_.open(ep.protocol());
+                acceptor_.bind(ep);
+                acceptor_.listen();
 
-                    start_accept();
+                start_accept();
 
-                    break;
-                }
-                catch (const std::exception& e)
-                {
-                    acceptor_.close();
-                    std::cout << "Exception: " << std::string(e.what()) << "\n";
-                }
-                endpoint_iterator++;
+                break;
             }
-        }
-        catch (const std::exception& e)
-        {
-            std::cout << "Exception: " << std::string(e.what()) << "\n";
+            catch (const std::exception& e)
+            {
+                acceptor_.close();
+                std::cout << "Exception: " << std::string(e.what()) << "\n";
+            }
+            endpoint_iterator++;
         }
     }
     else
