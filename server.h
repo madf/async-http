@@ -11,7 +11,6 @@ class Server
         Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, const std::string& outfile, const std::string& work_dir);
 
     private:
-        std::string make_log_line(const std::string& message);
         void write_log(const std::string& message);
         void handle_accept(std::shared_ptr<Connection> connection, const boost::system::error_code& error);
         void start_accept();
