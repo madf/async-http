@@ -86,7 +86,6 @@ void Server::handle_resolve(const error_code& err, tcp::resolver::iterator endpo
             }
             catch (const std::exception& e)
             {
-                acceptor_.close();
                 std::cout << "Exception: " << std::string(e.what()) << "\n";
             }
             endpoint_iterator++;
