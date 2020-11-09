@@ -21,7 +21,6 @@ class Server
         boost::asio::ip::tcp::acceptor acceptor_;
         std::string outfile_;
         std::string work_dir_;
-        char buff_[1024];
 };
 
 #endif
