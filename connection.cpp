@@ -85,11 +85,8 @@ Data Connection::read_file(const std::string& path)
             close(fd);
             return make_error(403, "File access not allowed", path + ": 403 File access not allowed.");
         }
-        else
-        {
-            close(fd);
-            return make_error(500, "The file descriptor is invalid.", path + ": 500 The file descriptor is invalid." + std::string(strerror(errno)));
-        }
+        close(fd);
+        return make_error(500, "The file descriptor is invalid.", path + ": 500 The file descriptor is invalid." + std::string(strerror(errno)));
     }
 }
 
