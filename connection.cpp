@@ -153,8 +153,8 @@ Data Connection::make_response(const Request& request)
 void Connection::start()
 {
     boost::asio::async_read(socket_, boost::asio::buffer(buff_),
-        bind(&Connection::read_complete, shared_from_this(), pls::_1, pls::_2),
-        bind(&Connection::handle_read, shared_from_this(), pls::_1, pls::_2));
+        std::bind(&Connection::read_complete, shared_from_this(), pls::_1, pls::_2),
+        std::bind(&Connection::handle_read, shared_from_this(), pls::_1, pls::_2));
 }
 
 void Connection::handle_write(const error_code& error, size_t /*bytes_transferred*/)
@@ -183,14 +183,14 @@ void Connection::handle_read(const error_code& error, size_t bytes)
         response_ = make_response(Request(start_str));
 
         boost::asio::async_write(socket_, boost::asio::buffer(response_),
-        boost::asio::transfer_all(),
-        bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
+            boost::asio::transfer_all(),
+            std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
     }
     else
     {
         boost::asio::async_read(socket_, boost::asio::buffer(buff_),
-            bind(&Connection::read_complete, shared_from_this(), pls::_1, pls::_2),
-            bind(&Connection::handle_read, shared_from_this(), pls::_1, pls::_2));
+            std::bind(&Connection::read_complete, shared_from_this(), pls::_1, pls::_2),
+            std::bind(&Connection::handle_read, shared_from_this(), pls::_1, pls::_2));
     }
 }
 
