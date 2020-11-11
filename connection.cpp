@@ -13,9 +13,9 @@ using boost::system::error_code;
 namespace pls = std::placeholders;
 
 Connection::Connection(boost::asio::io_service& io_service, const std::string& work_dir)
-    : socket_(io_service)
+    : socket_(io_service),
+      work_dir_(work_dir)
 {
-    work_dir_ = work_dir.empty() ? "." : work_dir;
 }
 
 size_t Connection::read_complete(const error_code& error, size_t bytes)
