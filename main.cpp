@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     const std::string version = "1.0.0";
     std::string address;
     std::string outfile;
-    std::string work_dir;
+    std::string work_dir = ".";
 
     for (int i = 1; i < argc; ++i)
     {
