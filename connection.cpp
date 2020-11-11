@@ -9,8 +9,14 @@
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
+using Data = std::vector<char>;
 
 namespace pls = std::placeholders;
+
+Data to_data(const std::string& source)
+{
+    return Data(source.begin(), source.end());
+}
 
 Connection::Connection(boost::asio::io_service& io_service, const std::string& work_dir)
     : socket_(io_service),
@@ -24,11 +30,6 @@ size_t Connection::read_complete(const error_code& error, size_t bytes)
     const std::string str = "\r\n\r\n";
     const bool found = std::search(buff_, buff_ + bytes, str.begin(), str.end()) != buff_ + bytes;
     return found ? 0 : 1;
-}
-
-Data Connection::to_data(const std::string& source)
-{
-    return Data(source.begin(), source.end());
 }
 
 Data Connection::make_error(unsigned code, const std::string& title, const std::string& message)
