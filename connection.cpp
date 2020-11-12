@@ -23,6 +23,13 @@ Data make_error(unsigned code, const std::string& title, const std::string& mess
     return to_data("HTTP/1.1 " + std::to_string(code) + " " + title + "\r\nContent-Type: text/plain\r\n\r\n"  + message + "\n");
 }
 
+std::string string_to_lower(std::string str)
+{
+    for (size_t i = 0; i < str.length(); i++)
+        str[i] = tolower(str[i]);
+    return str;
+}
+
 Connection::Connection(boost::asio::io_service& io_service, const std::string& work_dir)
     : socket_(io_service),
       work_dir_(work_dir)
@@ -35,13 +42,6 @@ size_t Connection::read_complete(const error_code& error, size_t bytes)
     const std::string str = "\r\n\r\n";
     const bool found = std::search(buff_, buff_ + bytes, str.begin(), str.end()) != buff_ + bytes;
     return found ? 0 : 1;
-}
-
-std::string Connection::string_to_lower(std::string str)
-{
-    for (size_t i = 0; i < str.length(); i++)
-        str[i] = tolower(str[i]);
-    return str;
 }
 
 Data Connection::read_file(const std::string& path)
