@@ -19,7 +19,6 @@ class Connection
 
     private:
         size_t read_complete(const boost::system::error_code& error, size_t bytes);
-        std::string string_to_lower(std::string str);
         Data read_file(const std::string& path);
         Data make_index(DIR *dir);
         Data make_response(const Request& request);
