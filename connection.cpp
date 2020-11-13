@@ -30,21 +30,7 @@ std::string string_to_lower(std::string str)
     return str;
 }
 
-Connection::Connection(boost::asio::io_service& io_service, const std::string& work_dir)
-    : socket_(io_service),
-      work_dir_(work_dir)
-{
-}
-
-size_t Connection::read_complete(const error_code& error, size_t bytes)
-{
-    if (error) return 0;
-    const std::string str = "\r\n\r\n";
-    const bool found = std::search(buff_, buff_ + bytes, str.begin(), str.end()) != buff_ + bytes;
-    return found ? 0 : 1;
-}
-
-Data Connection::read_file(const std::string& path)
+Data read_file(const std::string& path)
 {
     int fd = open(path.c_str(), O_RDONLY);
     if (fd == -1)
@@ -89,6 +75,20 @@ Data Connection::read_file(const std::string& path)
         close(fd);
         return make_error(500, "The file descriptor is invalid.", path + ": 500 The file descriptor is invalid." + std::string(strerror(errno)));
     }
+}
+
+Connection::Connection(boost::asio::io_service& io_service, const std::string& work_dir)
+    : socket_(io_service),
+      work_dir_(work_dir)
+{
+}
+
+size_t Connection::read_complete(const error_code& error, size_t bytes)
+{
+    if (error) return 0;
+    const std::string str = "\r\n\r\n";
+    const bool found = std::search(buff_, buff_ + bytes, str.begin(), str.end()) != buff_ + bytes;
+    return found ? 0 : 1;
 }
 
 Data Connection::make_index(DIR *dir)
