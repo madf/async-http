@@ -125,10 +125,10 @@ Data Connection::make_index(DIR *dir)
 Data Connection::make_response(const Request& request)
 {
     if (request.verb() != "GET")
-        return to_data("HTTP/1.1 405 Method not allowed\r\nContent-Type: text/plain\r\n\r\n405 Method not allowed.\n");
+        return make_error(405, "Method not allowed", "405 Method not allowed.");
 
     if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
-        return to_data("HTTP/1.1 505 HTTP Version Not Supported\r\nContent-Type: text/plain\r\n\r\n505 HTTP Version Not Supported.\n");
+        return make_error(505, "HTTP Version Not Supported", "505 HTTP Version Not Supported.");
 
     if (request.path() != "/")
     {
@@ -138,7 +138,7 @@ Data Connection::make_response(const Request& request)
     {
         DIR *dir = opendir(work_dir_.c_str());
         if (dir == NULL)
-            return to_data("HTTP/1.1 500 Failed to open directory\r\nContent-Type: text/plain\r\n\r\n500 Failed to open directory.\n");
+            return make_error(500, "Failed to open directory", "500 Failed to open directory.");
         Data index = make_index(dir);
         closedir(dir);
         return index;
