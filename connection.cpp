@@ -64,12 +64,9 @@ Data read_file(const std::string& path)
     }
     else
     {
-        if (errno == EACCES)
-        {
-            close(fd);
-            return make_error(403, "File access not allowed", path + ": 403 File access not allowed.");
-        }
         close(fd);
+        if (errno == EACCES)
+            return make_error(403, "File access not allowed", path + ": 403 File access not allowed.");
         return make_error(500, "The file descriptor is invalid.", path + ": 500 The file descriptor is invalid." + std::string(strerror(errno)));
     }
 }
