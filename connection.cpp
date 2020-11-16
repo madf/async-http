@@ -32,6 +32,10 @@ std::string to_lower(std::string str)
 
 Data read_file(const std::string& path)
 {
+    struct stat st;
+    if (stat(path.c_str(), &st) < 0)
+        return make_error(404, "File does not exist", path + ": 404 File does not exist.");
+
     int fd = open(path.c_str(), O_RDONLY);
     if (fd == -1)
     {
@@ -50,13 +54,6 @@ Data read_file(const std::string& path)
         header =  "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
     else
         header = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment\r\n\r\n";
-
-    struct stat st;
-    if (stat(path.c_str(), &st) < 0)
-    {
-        close(fd);
-        return make_error(404, "File does not exist", path + ": 404 File does not exist.");
-    }
 
     Data buff(st.st_size);
     if (read(fd, buff.data(), st.st_size) >= 0)
