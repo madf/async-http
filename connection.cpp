@@ -23,7 +23,7 @@ Data make_error(unsigned code, const std::string& title, const std::string& mess
     return to_data("HTTP/1.1 " + std::to_string(code) + " " + title + "\r\nContent-Type: text/plain\r\n\r\n"  + message + "\n");
 }
 
-std::string string_to_lower(std::string str)
+std::string to_lower(std::string str)
 {
     for (size_t i = 0; i < str.length(); i++)
         str[i] = tolower(str[i]);
@@ -43,7 +43,7 @@ Data read_file(const std::string& path)
             return make_error(500, "File open error", path + ": 500 File open error." + std::string(strerror(errno)));
     }
 
-    std::string ext = string_to_lower(path.substr(path.rfind(".") + 1));
+    std::string ext = to_lower(path.substr(path.rfind(".") + 1));
 
     std::string header;
     if (ext == "html" || ext == "htm")
