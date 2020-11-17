@@ -85,8 +85,12 @@ size_t Connection::read_complete(const error_code& error, size_t bytes)
     return found ? 0 : 1;
 }
 
-Data Connection::make_index(DIR *dir)
+Data Connection::make_index()
 {
+    DIR *dir = opendir(work_dir_.c_str());
+    if (dir == NULL)
+        return make_error(500, "Failed to open directory", "500 Failed to open directory.");
+
     std::string lines;
 
     for (struct dirent *entry = readdir(dir); entry != NULL; entry = readdir(dir))
@@ -107,6 +111,7 @@ Data Connection::make_index(DIR *dir)
             }
         }
     }
+    closedir(dir);
 
     const std::string table_html ="<!DOCTYPE html> \
         <html> \
@@ -131,18 +136,9 @@ Data Connection::make_response(const Request& request)
         return make_error(505, "HTTP Version Not Supported", "505 HTTP Version Not Supported.");
 
     if (request.path() != "/")
-    {
         return read_file(work_dir_ + "/" + request.path());
-    }
     else
-    {
-        DIR *dir = opendir(work_dir_.c_str());
-        if (dir == NULL)
-            return make_error(500, "Failed to open directory", "500 Failed to open directory.");
-        Data index = make_index(dir);
-        closedir(dir);
-        return index;
-    }
+        return make_index();
 }
 
 void Connection::start()
