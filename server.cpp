@@ -32,7 +32,7 @@ Server::Server(boost::asio::io_service& io_service, const std::string& host, con
         outfile_(outfile),
         work_dir_(work_dir)
 {
-    resolver_.async_resolve(tcp::resolver::query(host, port), bind(&Server::handle_resolve, this, pls::_1, pls::_2));
+    resolver_.async_resolve(tcp::resolver::query(host, port), std::bind(&Server::handle_resolve, this, pls::_1, pls::_2));
 }
 
 void Server::write_log(const std::string& message)
@@ -63,7 +63,7 @@ void Server::handle_accept(connection_ptr connection, const error_code& error)
 void Server::start_accept()
 {
      connection_ptr connection(new Connection(io_service_, work_dir_));
-     acceptor_.async_accept(connection->socket(), bind(&Server::handle_accept, this, connection, pls::_1));
+     acceptor_.async_accept(connection->socket(), std::bind(&Server::handle_accept, this, connection, pls::_1));
 }
 
 void Server::handle_resolve(const error_code& err, tcp::resolver::iterator endpoint_iterator)
