@@ -44,7 +44,7 @@ Data read_file(const std::string& path)
         else if (errno == EACCES)
             return make_error(403, "File access is not allowed", path + ": 403 File access is not allowed.");
         else
-            return make_error(500, "File open error", path + ": 500 File open error." + std::string(strerror(errno)));
+            return make_error(500, "Internal server error", path + ": 500 Internal server error." + std::string(strerror(errno)));
     }
 
     std::string ext = to_lower(path.substr(path.rfind(".") + 1));
