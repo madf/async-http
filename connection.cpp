@@ -179,9 +179,7 @@ void Connection::handle_read(const error_code& error, size_t bytes)
     }
     else
     {
-        boost::asio::async_read(socket_, boost::asio::buffer(buff_),
-            std::bind(&Connection::read_complete, shared_from_this(), pls::_1, pls::_2),
-            std::bind(&Connection::handle_read, shared_from_this(), pls::_1, pls::_2));
+        start();
     }
 }
 
