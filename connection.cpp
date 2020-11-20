@@ -42,7 +42,7 @@ Data read_file(const std::string& path)
         if (errno == ENOENT)
             return make_error(404, "File does not exist", path + ": 404 File does not exist.");
         else if (errno == EACCES)
-            return make_error(403, "File access not allowed", path + ": 403 File access not allowed.");
+            return make_error(403, "File access is not allowed", path + ": 403 File access is not allowed.");
         else
             return make_error(500, "File open error", path + ": 500 File open error." + std::string(strerror(errno)));
     }
