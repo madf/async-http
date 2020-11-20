@@ -89,7 +89,7 @@ Data Connection::make_index()
 {
     DIR *dir = opendir(work_dir_.c_str());
     if (dir == NULL)
-        return make_error(500, "Failed to open directory", "500 Failed to open directory.");
+        return make_error(500, "Failed to open directory", "500 Failed to open directory." + std::string(strerror(errno)));
 
     std::string lines;
 
