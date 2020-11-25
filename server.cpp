@@ -1,5 +1,4 @@
 #include "server.h"
-#include "request.h"
 #include <functional> //std::bind
 #include <iostream>
 #include <fstream>
