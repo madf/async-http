@@ -171,11 +171,22 @@ void Connection::handle_read(const error_code& error, size_t bytes)
     {
         const size_t str_end_pos = message_.find('\r');
         const std::string start_str = message_.substr(0, str_end_pos);
-        response_ = make_response(Request(start_str));
+        try
+        {
+            response_ = make_response(Request(start_str));
 
-        boost::asio::async_write(socket_, boost::asio::buffer(response_),
-            boost::asio::transfer_all(),
-            std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
+            boost::asio::async_write(socket_, boost::asio::buffer(response_),
+                boost::asio::transfer_all(),
+                std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
+        }
+        catch (const char* exception)
+        {
+            std::cerr << "Exception: " << exception << "\n";
+
+            boost::asio::async_write(socket_, boost::asio::buffer(make_error(400, "Bad request", "400 Bad request.")),
+                boost::asio::transfer_all(),
+                std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
+        }
     }
     else
     {
