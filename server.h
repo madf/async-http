@@ -11,7 +11,6 @@ class Server
         Server(boost::asio::io_service& io_service, const std::string& host, const std::string& port, const std::string& outfile, const std::string& work_dir);
 
     private:
-        void write_log(const std::string& message);
         void handle_accept(std::shared_ptr<Connection> connection, const boost::system::error_code& error);
         void start_accept();
         void handle_resolve(const boost::system::error_code& err, boost::asio::ip::tcp::resolver::iterator endpoint_iterator);
