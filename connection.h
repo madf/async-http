@@ -12,7 +12,7 @@ class Connection
     : public std::enable_shared_from_this<Connection>
 {
     public:
-        Connection(boost::asio::io_service& io_service, const std::string& work_dir);
+        Connection(boost::asio::io_service& io_service, const std::string& work_dir, const std::string& outfile);
 
         void start();
         boost::asio::ip::tcp::socket& socket();
@@ -29,6 +29,7 @@ class Connection
         std::string message_;
         std::string work_dir_;
         Data response_;
+        std::string outfile_;
 };
 
 #endif
