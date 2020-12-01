@@ -40,7 +40,7 @@ void Server::handle_accept(connection_ptr connection, const error_code& error)
 
 void Server::start_accept()
 {
-     connection_ptr connection(new Connection(io_service_, work_dir_));
+     connection_ptr connection(new Connection(io_service_, work_dir_, outfile_));
      acceptor_.async_accept(connection->socket(), std::bind(&Server::handle_accept, this, connection, pls::_1));
 }
 
