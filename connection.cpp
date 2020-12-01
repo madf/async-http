@@ -1,4 +1,5 @@
 #include "connection.h"
+#include "log.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -71,9 +72,10 @@ Data read_file(const std::string& path)
     }
 }
 
-Connection::Connection(boost::asio::io_service& io_service, const std::string& work_dir)
+Connection::Connection(boost::asio::io_service& io_service, const std::string& work_dir, const std::string& outfile)
     : socket_(io_service),
-      work_dir_(work_dir)
+      work_dir_(work_dir),
+      outfile_(outfile)
 {
 }
 
@@ -182,7 +184,7 @@ void Connection::handle_read(const error_code& error, size_t bytes)
         catch (const char* exception)
         {
             std::cerr << "Exception: " << exception << "\n";
-
+            write_log(socket().remote_endpoint().address().to_string() + " 400 Bad request", outfile_);
             boost::asio::async_write(socket_, boost::asio::buffer(make_error(400, "Bad request", "400 Bad request.")),
                 boost::asio::transfer_all(),
                 std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
