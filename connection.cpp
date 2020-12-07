@@ -132,10 +132,16 @@ Data Connection::make_index()
 Data Connection::make_response(const Request& request)
 {
     if (request.verb() != "GET")
+    {
+        write_log(socket().remote_endpoint().address().to_string() + " 405 Method not allowed", outfile_);
         return make_error(405, "Method not allowed", "405 Method not allowed.");
+    }
 
     if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
+    {
+        write_log(socket().remote_endpoint().address().to_string() + " 505 Version Not Supported", outfile_);
         return make_error(505, "HTTP Version Not Supported", "505 HTTP Version Not Supported.");
+    }
 
     if (request.path() != "/")
         return read_file(work_dir_ + "/" + request.path());
