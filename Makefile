@@ -5,13 +5,14 @@ SOURCES = main.cpp \
 		  server.cpp \
 		  connection.cpp \
 		  request.cpp \
-		  log.cpp
+		  log.cpp \
+		  error.cpp
 
 .PHONY: all clean
 
 all: server
 
-server: main.o server.o connection.o request.o log.o
+server: main.o server.o connection.o request.o log.o error.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 clean:
