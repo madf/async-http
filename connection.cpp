@@ -1,5 +1,6 @@
 #include "connection.h"
 #include "log.h"
+#include "error.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -35,7 +36,9 @@ Data read_file(const std::string& path)
 {
     struct stat st;
     if (stat(path.c_str(), &st) < 0)
-        return make_error(404, "File does not exist", path + ": 404 File does not exist.");
+    {
+        throw Error(errno, path);
+    }
 
     int fd = open(path.c_str(), O_RDONLY);
     if (fd == -1)
@@ -190,13 +193,27 @@ void Connection::handle_read(const error_code& error, size_t bytes)
                 boost::asio::transfer_all(),
                 std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
         }
-        catch (const char* exception)
+            catch (const Error& exception)
+            {
+                int code = exception.code();
+                std::string path = exception.path();
+                if (code == ENOENT)
+                {
+                    write_log(socket().remote_endpoint().address().to_string() + " 404 File does not exist", outfile_);
+                    boost::asio::async_write(socket_, boost::asio::buffer(make_error(404, "File does not exist", path + " 404 File does not exist.")),
+                        boost::asio::transfer_all(),
+                        std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
+                }
+
+            }
+
+/*        catch (const char* exception)
         {
             write_log(socket().remote_endpoint().address().to_string() + " 400 Bad request", outfile_);
             boost::asio::async_write(socket_, boost::asio::buffer(make_error(400, "Bad request", "400 Bad request.")),
                 boost::asio::transfer_all(),
                 std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
-        }
+        }*/
     }
     else
     {
