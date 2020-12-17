@@ -60,9 +60,7 @@ Data read_file(const std::string& path)
     else
     {
         close(fd);
-        if (errno == EACCES)
-            return make_error(403, "File access is not allowed", path + ": 403 File access is not allowed.");
-        return make_error(500, "Internal server error.", path + ": 500 Internal server error. " + std::string(strerror(errno)));
+        throw Error(errno, path);
     }
 }
 
