@@ -152,7 +152,7 @@ void Connection::handle_write(const error_code& error, size_t /*bytes_transferre
 {
     if (error)
     {
-        std::cout << "Error async_write: " << error.message() << "\n";
+        write_log(socket().remote_endpoint().address().to_string() + " Error async_write: " + error.message(), outfile_);
         return;
     }
 }
@@ -161,7 +161,7 @@ void Connection::handle_read(const error_code& error, size_t bytes)
 {
     if (error)
     {
-        std::cout << "Error async_read: " << error.message() << "\n";
+        write_log(socket().remote_endpoint().address().to_string() + " Error async_read: " + error.message(), outfile_);
         return;
     }
 
