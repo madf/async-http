@@ -186,21 +186,21 @@ void Connection::handle_read(const error_code& error, size_t bytes)
             std::string path = exception.path();
             if (code == ENOENT)
             {
-                write_log(socket().remote_endpoint().address().to_string() + " 404 File does not exist", outfile_);
+                write_log(socket().remote_endpoint().address().to_string() + " " + path + " 404 File does not exist", outfile_);
                 boost::asio::async_write(socket_, boost::asio::buffer(make_error(404, "File does not exist", path + " 404 File does not exist.")),
                     boost::asio::transfer_all(),
                     std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
             }
             else if (code == EACCES)
             {
-                write_log(socket().remote_endpoint().address().to_string() + " 403 File access is not allowed.", outfile_);
+                write_log(socket().remote_endpoint().address().to_string() + " " + path + " 403 File access is not allowed.", outfile_);
                 boost::asio::async_write(socket_, boost::asio::buffer(make_error(403, "File access is not allowed", path + " 403 File access is not allowed.")),
                     boost::asio::transfer_all(),
                     std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
             }
             else
             {
-                write_log(socket().remote_endpoint().address().to_string() + " 500 Internal server error.", outfile_);
+                write_log(socket().remote_endpoint().address().to_string() + " " + path + " 500 Internal server error.", outfile_);
                 boost::asio::async_write(socket_, boost::asio::buffer(make_error(500, "Internal server error", path + ": 500 Internal server error. " + std::string(strerror(code)))),
                     boost::asio::transfer_all(),
                     std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
