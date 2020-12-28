@@ -1,6 +1,8 @@
 #include "connection.h"
 #include "log.h"
 #include "error.h"
+#include "badverb.h"
+#include "badversion.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -125,16 +127,10 @@ Data Connection::make_index()
 Data Connection::make_response(const Request& request)
 {
     if (request.verb() != "GET")
-    {
-        write_log(socket().remote_endpoint().address().to_string() + " 405 Method not allowed", outfile_);
-        return make_error(405, "Method not allowed", "405 Method not allowed.");
-    }
+        throw Badverb(std::string("Method not allowed."));
 
     if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
-    {
-        write_log(socket().remote_endpoint().address().to_string() + " 505 Version Not Supported", outfile_);
-        return make_error(505, "HTTP Version Not Supported", "505 HTTP Version Not Supported.");
-    }
+        throw Badversion(std::string("HTTP Version Not Supported."));
 
     if (request.path() != "/")
         return read_file(work_dir_ + "/" + request.path());
@@ -205,6 +201,24 @@ void Connection::handle_read(const error_code& error, size_t bytes)
                     boost::asio::transfer_all(),
                     std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
             }
+        }
+        catch (const Badverb &exception)
+        {
+
+            std::string verb_error(exception.what());
+            write_log(socket().remote_endpoint().address().to_string() + " 405 " + verb_error, outfile_);
+            boost::asio::async_write(socket_, boost::asio::buffer(make_error(405, verb_error, "405 " + verb_error)),
+                boost::asio::transfer_all(),
+                std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
+        }
+        catch (const Badversion &exception)
+        {
+
+            std::string version_error(exception.what());
+            write_log(socket().remote_endpoint().address().to_string() + " 505 " + version_error, outfile_);
+            boost::asio::async_write(socket_, boost::asio::buffer(make_error(505, version_error, "505 " + version_error)),
+                boost::asio::transfer_all(),
+                std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
         }
         catch (std::exception &exception)
         {
