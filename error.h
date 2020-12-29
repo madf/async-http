@@ -7,9 +7,22 @@
 class Error: public std::runtime_error
 {
     public:
-        Error(int code, const std::string& path) noexcept;
-        int code() const;
-        std::string path() const;
+        Error(int code, const std::string& path) noexcept
+            : runtime_error(std::to_string(code)),
+              code_(code),
+              path_(path)
+            {
+            }
+
+        int code() const
+        {
+            return code_;
+        }
+
+        std::string path() const
+        {
+            return path_;
+        }
 
     private:
         int code_;
