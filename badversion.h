@@ -7,10 +7,7 @@
 class Badversion: public std::runtime_error
 {
     public:
-        Badversion(const std::string &message) noexcept
-            : runtime_error(message)
-            {
-            }
+        using std::runtime_error::runtime_error;
 };
 
 #endif
