@@ -64,13 +64,13 @@ void Server::handle_resolve(const error_code& err, tcp::resolver::iterator endpo
             }
             catch (const std::exception& e)
             {
-                std::cout << "Exception: " << std::string(e.what()) << "\n";
+                write_log("Exception handle_resolve: " + err.message(), outfile_);
             }
             endpoint_iterator++;
         }
     }
     else
     {
-        std::cout << "Error: " << err.message() << "\n";
+        write_log("Error async_resolve: " + err.message(), outfile_);
     }
 }
