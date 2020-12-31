@@ -222,9 +222,9 @@ void Connection::handle_read(const error_code& error, size_t bytes)
         }
         catch (std::exception &exception)
         {
-            std::string msg(exception.what());
-            write_log(socket().remote_endpoint().address().to_string() + " 400 " + msg, outfile_);
-           boost::asio::async_write(socket_, boost::asio::buffer(make_error(400, msg, "400 " + msg)),
+            std::string request_error(exception.what());
+            write_log(socket().remote_endpoint().address().to_string() + " 400 " + request_error, outfile_);
+           boost::asio::async_write(socket_, boost::asio::buffer(make_error(400, request_error, "400 " + request_error)),
                 boost::asio::transfer_all(),
                 std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
         }
