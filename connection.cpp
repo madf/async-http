@@ -3,7 +3,6 @@
 #include "error.h"
 #include "badverb.h"
 #include "badversion.h"
-#include <iostream>
 #include <fstream>
 #include <vector>
 #include <algorithm>
@@ -204,7 +203,6 @@ void Connection::handle_read(const error_code& error, size_t bytes)
         }
         catch (const Badverb &exception)
         {
-
             std::string verb_error(exception.what());
             write_log(socket().remote_endpoint().address().to_string() + " 405 " + verb_error, outfile_);
             boost::asio::async_write(socket_, boost::asio::buffer(make_error(405, verb_error, "405 " + verb_error)),
@@ -213,7 +211,6 @@ void Connection::handle_read(const error_code& error, size_t bytes)
         }
         catch (const Badversion &exception)
         {
-
             std::string version_error(exception.what());
             write_log(socket().remote_endpoint().address().to_string() + " 505 " + version_error, outfile_);
             boost::asio::async_write(socket_, boost::asio::buffer(make_error(505, version_error, "505 " + version_error)),
