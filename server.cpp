@@ -1,7 +1,6 @@
 #include "server.h"
 #include "log.h"
 #include <functional> //std::bind
-#include <iostream>
 #include <fstream>
 #include <ctime>
 
