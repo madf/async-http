@@ -29,4 +29,16 @@ class Error: public std::runtime_error
         std::string path_;
 };
 
+class BadVerb: public std::runtime_error
+{
+    public:
+        using std::runtime_error::runtime_error;
+};
+
+class BadVersion: public std::runtime_error
+{
+    public:
+        using std::runtime_error::runtime_error;
+};
+
 #endif
