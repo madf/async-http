@@ -1,8 +1,6 @@
 #include "connection.h"
 #include "log.h"
 #include "error.h"
-#include "badverb.h"
-#include "badversion.h"
 #include <fstream>
 #include <vector>
 #include <algorithm>
