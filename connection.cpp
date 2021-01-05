@@ -126,10 +126,10 @@ Data Connection::make_index()
 Data Connection::make_response(const Request& request)
 {
     if (request.verb() != "GET")
-        throw Badverb(std::string("Method not allowed."));
+        throw BadVerb(std::string("Method not allowed."));
 
     if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
-        throw Badversion(std::string("HTTP Version Not Supported."));
+        throw BadVersion(std::string("HTTP Version Not Supported."));
 
     if (request.path() != "/")
         return read_file(work_dir_ + "/" + request.path());
@@ -201,7 +201,7 @@ void Connection::handle_read(const error_code& error, size_t bytes)
                     std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
             }
         }
-        catch (const Badverb &exception)
+        catch (const BadVerb &exception)
         {
             std::string verb_error(exception.what());
             write_log(socket().remote_endpoint().address().to_string() + " 405 " + verb_error, outfile_);
@@ -209,7 +209,7 @@ void Connection::handle_read(const error_code& error, size_t bytes)
                 boost::asio::transfer_all(),
                 std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
         }
-        catch (const Badversion &exception)
+        catch (const BadVersion &exception)
         {
             std::string version_error(exception.what());
             write_log(socket().remote_endpoint().address().to_string() + " 505 " + version_error, outfile_);
