@@ -198,17 +198,15 @@ void Connection::handle_read(const error_code& error, size_t bytes)
         }
         catch (const BadVerb &exception)
         {
-            std::string verb_error(exception.what());
-            write_log(socket().remote_endpoint().address().to_string() + " 405 " + verb_error, outfile_);
-            boost::asio::async_write(socket_, boost::asio::buffer(make_error(405, verb_error, "405 " + verb_error)),
+            write_log(socket().remote_endpoint().address().to_string() + " 405 " + std::string(exception.what()), outfile_);
+            boost::asio::async_write(socket_, boost::asio::buffer(make_error(405, std::string(exception.what()), "405 " + std::string(exception.what()))),
                 boost::asio::transfer_all(),
                 std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
         }
         catch (const BadVersion &exception)
         {
-            std::string version_error(exception.what());
-            write_log(socket().remote_endpoint().address().to_string() + " 505 " + version_error, outfile_);
-            boost::asio::async_write(socket_, boost::asio::buffer(make_error(505, version_error, "505 " + version_error)),
+            write_log(socket().remote_endpoint().address().to_string() + " 505 " + std::string (exception.what()), outfile_);
+            boost::asio::async_write(socket_, boost::asio::buffer(make_error(505, std::string (exception.what()), "505 " + std::string (exception.what()))),
                 boost::asio::transfer_all(),
                 std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
         }
