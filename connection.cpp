@@ -4,7 +4,6 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
-#include <exception>
 #include <cerrno>
 #include <functional> // std::bind
 #include <sys/stat.h> //stat, struct stat, open
