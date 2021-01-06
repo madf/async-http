@@ -210,7 +210,7 @@ void Connection::handle_read(const error_code& error, size_t bytes)
                 boost::asio::transfer_all(),
                 std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
         }
-        catch (std::exception &exception)
+        catch (const std::exception &exception)
         {
             std::string request_error(exception.what());
             write_log(socket().remote_endpoint().address().to_string() + " 400 " + request_error, outfile_);
