@@ -123,10 +123,10 @@ Data Connection::make_index()
 Data Connection::make_response(const Request& request)
 {
     if (request.verb() != "GET")
-        throw BadVerb(std::string("Method not allowed."));
+        throw BadVerb("Method not allowed.");
 
     if (request.version() != "HTTP/1.1" && request.version() != "HTTP/1.0")
-        throw BadVersion(std::string("HTTP Version Not Supported."));
+        throw BadVersion("HTTP Version Not Supported.");
 
     if (request.path() != "/")
         return read_file(work_dir_ + "/" + request.path());
