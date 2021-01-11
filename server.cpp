@@ -32,7 +32,7 @@ void Server::handle_accept(connection_ptr connection, const error_code& error)
     }
     else
     {
-        write_log(connection->socket().remote_endpoint().address().to_string() + "Error async_accept: " + error.message(), outfile_);
+        write_log("Error async_accept: " + error.message(), outfile_);
         return;
     }
 }
