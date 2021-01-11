@@ -212,9 +212,8 @@ void Connection::handle_read(const error_code& error, size_t bytes)
         }
         catch (const BadRequest &exception)
         {
-            std::string request_error(exception.what());
-            write_log(socket().remote_endpoint().address().to_string() + " 400 " + request_error, outfile_);
-            boost::asio::async_write(socket_, boost::asio::buffer(make_error(400, request_error, "400 " + request_error)),
+            write_log(socket().remote_endpoint().address().to_string() + " 400 " + std::string(exception.what()), outfile_);
+            boost::asio::async_write(socket_, boost::asio::buffer(make_error(400, std::string(exception.what()), "400 " + std::string(exception.what()))),
                 boost::asio::transfer_all(),
                 std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
         }
