@@ -29,6 +29,12 @@ class Error: public std::runtime_error
         std::string path_;
 };
 
+class BadRequest: public std::runtime_error
+{
+    public:
+        using std::runtime_error::runtime_error;
+};
+
 class BadVerb: public std::runtime_error
 {
     public:
