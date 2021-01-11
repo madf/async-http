@@ -19,7 +19,7 @@ class Error: public std::runtime_error
             return code_;
         }
 
-        std::string path() const
+        const std::string& path() const
         {
             return path_;
         }
