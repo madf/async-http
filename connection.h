@@ -23,6 +23,7 @@ class Connection
         Data make_response(const Request& request);
         void handle_read(const boost::system::error_code& error, size_t bytes);
         void handle_write(const boost::system::error_code& error, size_t /*bytes_transferred*/);
+        void handle_exception(unsigned code, const std::string& title, const std::string& message);
 
         boost::asio::ip::tcp::socket socket_;
         char buff_[1024];
