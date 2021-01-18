@@ -182,12 +182,18 @@ void Connection::handle_read(const error_code& error, size_t bytes)
         }
         catch (const Error &exception)
         {
-            if (exception.code() == ENOENT)
-                handle_exception(404, "File does not exist", exception.path() + " 404 File does not exist.");
-            else if (exception.code() == EACCES)
-                handle_exception(403, "File access is not allowed", exception.path() + " 403 File access is not allowed.");
-            else
-                handle_exception(500, "Internal server error", exception.path() + " 500 Internal server error. " + std::string(strerror(exception.code())));
+            switch (exception.code())
+            {
+                case ENOENT:
+                    handle_exception(404, "File does not exist", exception.path() + " 404 File does not exist.");
+                    break;
+                case EACCES:
+                    handle_exception(403, "File access is not allowed", exception.path() + " 403 File access is not allowed.");
+                    break;
+                default:
+                    handle_exception(500, "Internal server error", exception.path() + " 500 Internal server error. " + std::string(strerror(exception.code())));
+                    break;
+            }
         }
         catch (const BadVerb &exception)
         {
