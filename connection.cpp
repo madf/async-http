@@ -40,7 +40,7 @@ Data read_file(const std::string& path)
     if (fd == -1)
         throw Error(errno, path);
 
-    std::string ext = to_lower(path.substr(path.rfind(".") + 1));
+    const std::string ext = to_lower(path.substr(path.rfind(".") + 1));
 
     std::string header;
     if (ext == "html" || ext == "htm")
