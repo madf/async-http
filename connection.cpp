@@ -10,7 +10,6 @@
 
 using boost::asio::ip::tcp;
 using boost::system::error_code;
-using Data = std::vector<char>;
 
 namespace pls = std::placeholders;
 
