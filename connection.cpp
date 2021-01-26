@@ -57,8 +57,9 @@ Data read_file(const std::string& path)
     }
     else
     {
+        int err = errno;
         close(fd);
-        throw Error(errno, path);
+        throw Error(err, path);
     }
 }
 
