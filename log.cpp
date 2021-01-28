@@ -24,3 +24,8 @@ void write_log(const std::string& message, const std::string& outfile)
     else
         std::cout << make_log_line(message);
 }
+
+void write_log(const boost::asio::ip::tcp::socket& socket, const std::string& message, const std::string& outfile)
+{
+    write_log(socket.remote_endpoint().address().to_string() + " " + message, outfile);
+}
