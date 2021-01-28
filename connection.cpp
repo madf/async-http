@@ -145,14 +145,14 @@ void Connection::handle_write(const error_code& error, size_t /*bytes_transferre
 {
     if (error)
     {
-        write_log(socket().remote_endpoint().address().to_string() + " Error async_write: " + error.message(), outfile_);
+        write_log(socket_, " Error async_write: " + error.message(), outfile_);
         return;
     }
 }
 
 void Connection::handle_exception(unsigned code, const std::string& title, const std::string& message)
 {
-    write_log(socket().remote_endpoint().address().to_string() + " " + message, outfile_);
+    write_log(socket_, " " + message, outfile_);
     boost::asio::async_write(socket_, boost::asio::buffer(make_error(code, title, message)),
         boost::asio::transfer_all(),
         std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
@@ -162,7 +162,7 @@ void Connection::handle_read(const error_code& error, size_t bytes)
 {
     if (error)
     {
-        write_log(socket().remote_endpoint().address().to_string() + " Error async_read: " + error.message(), outfile_);
+        write_log(socket_, " Error async_read: " + error.message(), outfile_);
         return;
     }
 
