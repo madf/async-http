@@ -180,7 +180,7 @@ void Connection::handle_read(const error_code& error, size_t bytes)
                 boost::asio::transfer_all(),
                 std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
         }
-        catch (const Error &exception)
+        catch (const Error& exception)
         {
             switch (exception.code())
             {
@@ -195,15 +195,15 @@ void Connection::handle_read(const error_code& error, size_t bytes)
                     break;
             }
         }
-        catch (const BadVerb &exception)
+        catch (const BadVerb& exception)
         {
             handle_exception(405, std::string(exception.what()), "405 " + std::string(exception.what()));
         }
-        catch (const BadVersion &exception)
+        catch (const BadVersion& exception)
         {
             handle_exception(505, std::string(exception.what()), "505 " + std::string(exception.what()));
         }
-        catch (const BadRequest &exception)
+        catch (const BadRequest& exception)
         {
             handle_exception(400, std::string(exception.what()), "400 " + std::string(exception.what()));
         }
