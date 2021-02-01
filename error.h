@@ -3,12 +3,13 @@
 
 #include <string>
 #include <stdexcept>
+#include <cstring>
 
 class Error: public std::runtime_error
 {
     public:
         Error(int code, const std::string& path) noexcept
-            : runtime_error(std::to_string(code)),
+            : runtime_error(strerror(code)),
               code_(code),
               path_(path)
             {
