@@ -30,22 +30,19 @@ class Error: public std::runtime_error
         std::string path_;
 };
 
-class BadRequest: public std::runtime_error
+struct BadRequest : std::runtime_error
 {
-    public:
-        using std::runtime_error::runtime_error;
+    using std::runtime_error::runtime_error;
 };
 
-class BadVerb: public std::runtime_error
+struct BadVerb : std::runtime_error
 {
-    public:
-        using std::runtime_error::runtime_error;
+    using std::runtime_error::runtime_error;
 };
 
-class BadVersion: public std::runtime_error
+struct BadVersion : std::runtime_error
 {
-    public:
-        using std::runtime_error::runtime_error;
+    using std::runtime_error::runtime_error;
 };
 
 #endif
