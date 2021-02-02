@@ -47,10 +47,10 @@ void Server::handle_resolve(const error_code& err, tcp::resolver::iterator endpo
 {
     if (!err)
     {
-        tcp::resolver::iterator end;
+        const tcp::resolver::iterator end;
         while (endpoint_iterator != end)
         {
-            tcp::endpoint ep = *endpoint_iterator;
+            const tcp::endpoint ep = *endpoint_iterator;
             try
             {
                 acceptor_.open(ep.protocol());
