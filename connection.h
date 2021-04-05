@@ -4,6 +4,7 @@
 #include "request.h"
 #include <boost/asio.hpp>
 #include <string>
+#include <memory>
 #include <dirent.h> //struct dirent, opendir, readdir, closedir
 
 using Data = std::vector<char>;
