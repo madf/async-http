@@ -168,49 +168,47 @@ void Connection::handle_read(const error_code& error, size_t bytes)
 
     message_.append(buff_, bytes);
 
-    if (bytes < 1024)
-    {
-        const size_t str_end_pos = message_.find('\r');
-        const std::string start_str = message_.substr(0, str_end_pos);
-        try
-        {
-            response_ = make_response(Request(start_str));
-
-            boost::asio::async_write(socket_, boost::asio::buffer(response_),
-                boost::asio::transfer_all(),
-                std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
-        }
-        catch (const Error& exception)
-        {
-            switch (exception.code())
-            {
-                case ENOENT:
-                    handle_exception(404, "File does not exist", exception.path() + " 404 File does not exist.");
-                    break;
-                case EACCES:
-                    handle_exception(403, "File access is not allowed", exception.path() + " 403 File access is not allowed.");
-                    break;
-                default:
-                    handle_exception(500, "Internal server error", exception.path() + " 500 Internal server error. " + std::string(strerror(exception.code())));
-                    break;
-            }
-        }
-        catch (const BadVerb& exception)
-        {
-            handle_exception(405, std::string(exception.what()), "405 " + std::string(exception.what()));
-        }
-        catch (const BadVersion& exception)
-        {
-            handle_exception(505, std::string(exception.what()), "505 " + std::string(exception.what()));
-        }
-        catch (const BadRequest& exception)
-        {
-            handle_exception(400, std::string(exception.what()), "400 " + std::string(exception.what()));
-        }
-    }
-    else
+    if (bytes == 1024)
     {
         start();
+        return;
+    }
+    const size_t str_end_pos = message_.find('\r');
+    const std::string start_str = message_.substr(0, str_end_pos);
+    try
+    {
+        response_ = make_response(Request(start_str));
+
+        boost::asio::async_write(socket_, boost::asio::buffer(response_),
+            boost::asio::transfer_all(),
+            std::bind(&Connection::handle_write, shared_from_this(), pls::_1, pls::_2));
+    }
+    catch (const Error& exception)
+    {
+        switch (exception.code())
+        {
+            case ENOENT:
+                handle_exception(404, "File does not exist", exception.path() + " 404 File does not exist.");
+                break;
+            case EACCES:
+                handle_exception(403, "File access is not allowed", exception.path() + " 403 File access is not allowed.");
+                break;
+            default:
+                handle_exception(500, "Internal server error", exception.path() + " 500 Internal server error. " + std::string(strerror(exception.code())));
+                break;
+        }
+    }
+    catch (const BadVerb& exception)
+    {
+        handle_exception(405, std::string(exception.what()), "405 " + std::string(exception.what()));
+    }
+    catch (const BadVersion& exception)
+    {
+        handle_exception(505, std::string(exception.what()), "505 " + std::string(exception.what()));
+    }
+    catch (const BadRequest& exception)
+    {
+        handle_exception(400, std::string(exception.what()), "400 " + std::string(exception.what()));
     }
 }
 
